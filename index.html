@@ -81,6 +81,14 @@
             color: #ff13f0;
             text-decoration: underline;
         }
+        #search-bar {
+            margin-bottom: 20px;
+            padding: 10px;
+            width: 10%;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
         .recipe {
             margin-bottom: 20px;
             padding: 15px;
@@ -97,6 +105,24 @@
             background: #444;
             color: #fff;
         }
+        .recipe-link {
+        color: black;
+        text-decoration: none;
+        transition: background-color 0.2s, color 0.2s;
+    }
+
+    .recipe-link.active {
+        background-color: #6eff13;
+        color: white;
+    }
+    #recommendation-box {
+        margin-top: 20px;
+        padding: 10px;
+        background-color: #f1f1f1;
+        border: 1px solid #ccc;
+        display: none;
+    }
+
     </style>
 </head>
 <body>
@@ -106,6 +132,8 @@
     </header>
    
     <div class="container">
+        <input type="text" id="search-bar" placeholder="Search recipes..." onkeyup="filterRecipes()" /><div id="recommendation-box"></div>
+        
         <section id="index">
             <h2>Index</h2>
             <ul id="recipe-index"></ul>
@@ -120,6 +148,9 @@
     </footer>
 
     <script>
+
+
+
         // Array of recipes
         const recipes = [
 
@@ -1012,43 +1043,114 @@
     },
 
         ];
+     // Populate the index and recipes
+     const indexElement = document.getElementById("recipe-index");
+    const recipesElement = document.getElementById("recipe-list");
 
-        // Populate the index and recipes
-        const indexElement = document.getElementById("recipe-index");
-        const recipesElement = document.getElementById("recipe-list");
+    recipes.forEach((recipe, index) => {
+        // Add to index
+        const listItem = document.createElement("li");
+        const link = document.createElement("a");
+        link.href = `#recipe-${index}`;
+        link.textContent = recipe.title;
+        link.dataset.index = index; // Add data attribute for reference
+        link.className = "recipe-link"; // Add a class for styling
+        listItem.appendChild(link);
+        indexElement.appendChild(listItem);
 
-        recipes.forEach((recipe, index) => {
-            // Add to index
-            const listItem = document.createElement("li");
-            const link = document.createElement("a");
-            link.href = `#recipe-${index}`;
-            link.textContent = recipe.title;
-            listItem.appendChild(link);
-            indexElement.appendChild(listItem);
+        // Add to recipes
+        const recipeDiv = document.createElement("div");
+        recipeDiv.className = "recipe";
+        recipeDiv.id = `recipe-${index}`;
 
-            // Add to recipes
-            const recipeDiv = document.createElement("div");
-            recipeDiv.className = "recipe";
-            recipeDiv.id = `recipe-${index}`;
+        const title = document.createElement("h3");
+        title.textContent = recipe.title;
+        recipeDiv.appendChild(title);
 
-            const title = document.createElement("h3");
-            title.textContent = recipe.title;
-            recipeDiv.appendChild(title);
-
-            const ingredients = document.createElement("ul");
-            recipe.ingredients.forEach(ingredient => {
-                const item = document.createElement("li");
-                item.textContent = ingredient;
-                ingredients.appendChild(item);
-            });
-            recipeDiv.appendChild(ingredients);
-
-            const instructions = document.createElement("p");
-            instructions.textContent = recipe.instructions.trim();
-            recipeDiv.appendChild(instructions);
-
-            recipesElement.appendChild(recipeDiv);
+        const ingredients = document.createElement("ul");
+        recipe.ingredients.forEach(ingredient => {
+            const item = document.createElement("li");
+            item.textContent = ingredient;
+            ingredients.appendChild(item);
         });
+        recipeDiv.appendChild(ingredients);
+
+        const instructions = document.createElement("p");
+        instructions.textContent = recipe.instructions.trim();
+        recipeDiv.appendChild(instructions);
+
+        recipesElement.appendChild(recipeDiv);
+    });
+
+    // Filter recipes by name or ingredient
+    function filterRecipes() {
+        const query = document.getElementById('search-bar').value.toLowerCase().replace(/\d+/g, ''); // Remove numbers
+        const recipeLinks = document.querySelectorAll('#recipe-index li');
+        const allRecipes = document.querySelectorAll('.recipe');
+
+        const recommendations = [];
+
+        recipeLinks.forEach((link, index) => {
+            const recipe = recipes[index];
+            const recipeName = recipe.title.toLowerCase();
+            const ingredients = recipe.ingredients.map(ing => ing.toLowerCase());
+
+            // Check if the query matches the recipe name or any ingredient
+            const matches = recipeName.includes(query) || ingredients.some(ing => ing.includes(query));
+
+            // Show or hide the link based on the match
+            link.style.display = matches ? 'block' : 'none';
+
+            // Show or hide the corresponding recipe
+            allRecipes[index].style.display = matches ? 'block' : 'none';
+
+            // Add to recommendations if partially matches
+            if (recipeName.includes(query) || ingredients.some(ing => ing.includes(query))) {
+                recommendations.push(recipe.title);
+            }
+        });
+
+          // Show up to 3 recommendations if matches found
+    const recommendationBox = document.getElementById('recommendation-box');
+    if (recommendations.length > 0 && query.trim() !== "") {
+        const limitedRecommendations = recommendations.slice(0, 3); // Limit to 3 recommendations
+        recommendationBox.innerHTML = `<strong>Recommendations:</strong> ${limitedRecommendations.join(', ')}`;
+        recommendationBox.style.display = 'block';
+    } else {
+        recommendationBox.style.display = 'none';
+        }
+    }
+
+    // Handle recipe click to show only the selected recipe
+    indexElement.addEventListener('click', (event) => {
+        if (event.target.tagName === 'A') {
+            event.preventDefault(); // Prevent default link behavior
+
+            const selectedIndex = event.target.dataset.index;
+            const allRecipes = document.querySelectorAll('.recipe');
+            const allLinks = document.querySelectorAll('.recipe-link');
+            const selectedLink = event.target;
+
+            // Toggle color and visibility
+            if (selectedLink.classList.contains('active')) {
+                // If already active, show all recipes and reset button colors
+                allRecipes.forEach(recipe => recipe.style.display = 'block');
+                allLinks.forEach(link => link.classList.remove('active'));
+            } else {
+                // Otherwise, show only the selected recipe
+                allRecipes.forEach((recipe, index) => {
+                    recipe.style.display = index == selectedIndex ? 'block' : 'none';
+                });
+
+                // Update button colors
+                allLinks.forEach(link => link.classList.remove('active'));
+                selectedLink.classList.add('active');
+            }
+        }
+    });
+
+    // Reset view when the search bar is cleared
+    document.getElementById('search-bar').addEventListener('input', filterRecipes);
     </script>
 </body>
 </html>
