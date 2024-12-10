@@ -84,7 +84,7 @@
         #search-bar {
             margin-bottom: 20px;
             padding: 10px;
-            width: 30%;
+            width: 10%;
             border-radius: 5px;
             border: 1px solid #ccc;
             font-size: 16px;
@@ -1043,8 +1043,8 @@
     },
 
         ];
-     // Populate the index and recipes
-     const indexElement = document.getElementById("recipe-index");
+    // Populate the index and recipes
+    const indexElement = document.getElementById("recipe-index");
     const recipesElement = document.getElementById("recipe-list");
 
     recipes.forEach((recipe, index) => {
@@ -1110,14 +1110,16 @@
             }
         });
 
-          // Show up to 3 recommendations if matches found
-    const recommendationBox = document.getElementById('recommendation-box');
-    if (recommendations.length > 0 && query.trim() !== "") {
-        const limitedRecommendations = recommendations.slice(0, 3); // Limit to 3 recommendations
-        recommendationBox.innerHTML = `<strong>Recommendations:</strong> ${limitedRecommendations.join(', ')}`;
-        recommendationBox.style.display = 'block';
-    } else {
-        recommendationBox.style.display = 'none';
+        // Show up to 3 recommendations if matches found
+        const recommendationBox = document.getElementById('recommendation-box');
+        if (recommendations.length > 0 && query.trim() !== "") {
+            const limitedRecommendations = recommendations.slice(0, 3); // Limit to 3 recommendations
+            recommendationBox.innerHTML = `<strong>Recommendations:</strong><ul>${limitedRecommendations
+                .map(rec => `<li style="margin-bottom: 10px;">${rec}</li>`)
+                .join('')}</ul>`;
+            recommendationBox.style.display = 'block';
+        } else {
+            recommendationBox.style.display = 'none';
         }
     }
 
@@ -1151,6 +1153,8 @@
 
     // Reset view when the search bar is cleared
     document.getElementById('search-bar').addEventListener('input', filterRecipes);
-    </script>
+</script>
+
+<div id="recommendation-box" style="margin-top: 20px; padding: 10px; background-color: #f1f1f1; border: 1px solid #ccc; display: none;"></div>
 </body>
 </html>
