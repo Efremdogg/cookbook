@@ -1113,7 +1113,7 @@
         // Show up to 3 recommendations if matches found
         const recommendationBox = document.getElementById('recommendation-box');
         if (recommendations.length > 0 && query.trim() !== "") {
-            const limitedRecommendations = recommendations.slice(0, 3); // Limit to 3 recommendations
+            const limitedRecommendations = recommendations.slice(0, 5); // Limit to 3 recommendations
             recommendationBox.innerHTML = `<strong>Recommendations:</strong><ul>${limitedRecommendations
                 .map(rec => `<li style="margin-bottom: 10px;">${rec}</li>`)
                 .join('')}</ul>`;
