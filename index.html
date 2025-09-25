@@ -306,17 +306,7 @@
       });
     }
 
-    function recipeToSchema(r){
-      return {
-        "@context":"https://schema.org",
-        "@type":"Recipe",
-        name: r.title,
-        recipeCategory: (r.categories||[]).join(', '),
-        recipeIngredient: r.ingredients,
-        recipeInstructions: r.instructions.trim().split(/\n\n+/).map(step=>({"@type":"HowToStep", text: step.trim()}))
-      };
-    }
-
+    
     function renderRecipes(list, term=''){
       const wrap = document.getElementById('recipe-list');
       wrap.innerHTML = '';
@@ -343,12 +333,6 @@
           <div id="${id}-instructions"><p>${highlight(r.instructions.trim(), term).replace(/\n\n/g,'</p><p>')}</p></div>
         `;
         wrap.appendChild(art);
-
-        // Schema per recipe (SEO)
-        const s = document.createElement('script');
-        s.type = 'application/ld+json';
-        s.textContent = JSON.stringify(recipeToSchema(r));
-        art.appendChild(s);
       });
       // Title click also enables single view
       wrap.querySelectorAll('[data-open]').forEach(b=>{
@@ -448,9 +432,6 @@
 
       // New tests
       ok(escapeHtml('<>&"\'').includes('&lt;') && escapeHtml('<>&"\'').includes('&quot;'), 'escapeHtml() escapes HTML chars');
-      const schemaScripts = document.querySelectorAll('.recipe script[type="application/ld+json"]').length;
-      const recipeArticles = document.querySelectorAll('.recipe').length;
-      ok(schemaScripts === recipeArticles, 'Each recipe renders a JSON-LD script');
       ok('a\nb'.split('\n').length === 2, 'JS newline split works');
       ok(document.getElementById('add-form') && document.getElementById('add-ings'), 'Add modal form exists');
 
@@ -537,22 +518,6 @@
       handleHash();
       runTests();
     })();
-  </script>
-
-  <!-- Optional schema to help SEO: simple ItemList of recipe anchors -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    "itemListElement": [
-      { "@type": "ListItem", "position": 1, "url": "#beurre-cafe-de-paris" },
-      { "@type": "ListItem", "position": 2, "url": "#filetto-al-pepe-verde" },
-      { "@type": "ListItem", "position": 3, "url": "#poulet-cremeux-a-la-dijon" },
-      { "@type": "ListItem", "position": 4, "url": "#pasta" },
-      { "@type": "ListItem", "position": 5, "url": "#gnocchi" },
-      { "@type": "ListItem", "position": 6, "url": "#pizza" }
-    ]
-  }
   </script>
 </body>
 </html>
