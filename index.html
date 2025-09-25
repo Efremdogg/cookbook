@@ -1,1772 +1,406 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Efrem Raimondo's Cookbook</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 0;
-            background: #D3D3D3;
-        }
-        header {
-            background: #444;
-            color: #fff;
-            padding: 20px;
-            text-align: center;
-        }
-        nav {
-            background: #555;
-            color: #fff;
-            padding: 10px;
-            text-align: center;
-        }
-        nav a {
-            color: #fff;
-            margin: 0 10px;
-            text-decoration: none;
-        }
-        nav a:hover {
-            text-decoration: underline;
-        }
-        .container {
-            padding: 20px;
-        }
-        #recipe-index {
-            display: grid;
-            grid-template-columns: 1fr; /* Default: Single column for narrow screens */
-            gap: 15px;
-            padding: 0;
-            list-style: none;
-        }
-        @media (min-width: 768px) {
-            #recipe-index {
-                grid-template-columns: 1fr 1fr; /* Two columns for medium screens */
-            }
-        }
-        @media (min-width: 1200px) {
-            #recipe-index {
-                grid-template-columns: 1fr 1fr 1fr; /* Three columns for large screens */
-            }
-        }
-            @media (min-width: 1600px) {
-            #recipe-index {
-                grid-template-columns: 1fr 1fr 1fr 1fr; /* Three columns for large screens */
-            }
-        }
-        #recipe-index li {
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
-            padding: 15px;
-            text-align: center;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        #recipe-index li:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-        }
-        #recipe-index a {
-            text-decoration: none;
-            color: #444;
-            font-weight: bold;
-            font-size: 16px;
-            display: block;
-        }
-        #recipe-index a:hover {
-            color: #ff13f0;
-            text-decoration: underline;
-        }
-        #search-bar {
-            margin-bottom: 20px;
-            padding: 10px;
-            width: 25%;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            font-size: 16px;
-        }
-        .recipe {
-            margin-bottom: 20px;
-            padding: 15px;
-            background: #fff;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        h2, h3 {
-            color: black;
-        }
-        footer {
-            text-align: center;
-            padding: 10px;
-            background: #444;
-            color: #fff;
-        }
-        .recipe-link {
-        color: black;
-        text-decoration: none;
-        transition: background-color 0.2s, color 0.2s;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Efrem Raimondo's Cookbook</title>
+  <meta name="description" content="No‑nonsense recipes by Efrem Raimondo. Simple search, clean index, and fast navigation." />
+  <meta name="theme-color" content="#444444" />
+  <style>
+    :root{
+      --bg:#e6e6e6; /* softer than pure #d3d3d3 */
+      --card:#ffffff;
+      --ink:#222;
+      --muted:#666;
+      --brand:#ff13f0; /* your hover color */
+      --shadow:0 3px 6px rgba(0,0,0,.1);
+      --shadow-lg:0 6px 16px rgba(0,0,0,.16);
+      --radius:12px;
     }
+    *{box-sizing:border-box}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.6;margin:0;background:var(--bg);color:var(--ink)}
+    header{background:#444;color:#fff;padding:28px 16px;text-align:center}
+    header h1{margin:.2rem 0 0;font-size:1.8rem}
+    header p{margin:.3rem 0 0;color:#e8e8e8}
 
-    .recipe-link.active {
-        background-color: #ffffff;
-        color: white;
-    }
-    #recommendation-box {
-        margin-top: 20px;
-        padding: 10px;
-        background-color: #f1f1f1;
-        border: 1px solid #ccc;
-        display: none;
-    }
+    .container{max-width:1100px;margin:0 auto;padding:20px}
 
-    </style>
+    /* Search row */
+    .tools{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    #search-bar{flex:1 1 360px;padding:12px 14px;border-radius:10px;border:1px solid #ccc;font-size:16px;outline:none}
+    #search-bar:focus{border-color:#999;box-shadow:0 0 0 3px rgba(0,0,0,.06)}
+    #count{color:var(--muted);font-size:.95rem}
+
+    /* Index grid */
+    #recipe-index{display:grid;grid-template-columns:1fr;gap:14px;list-style:none;padding:0;margin:18px 0}
+    @media (min-width: 700px){#recipe-index{grid-template-columns:1fr 1fr}}
+    @media (min-width: 1000px){#recipe-index{grid-template-columns:1fr 1fr 1fr}}
+    @media (min-width: 1400px){#recipe-index{grid-template-columns:1fr 1fr 1fr 1fr}}
+
+    #recipe-index li{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 16px;transition:transform .15s ease, box-shadow .15s ease}
+    #recipe-index li:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+    #recipe-index a{display:block;text-decoration:none;color:#333;font-weight:600}
+    #recipe-index a:hover{color:var(--brand);text-decoration:underline}
+
+    .recipe{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin:18px 0}
+    .recipe h3{margin-top:0}
+    .recipe .meta{color:var(--muted);font-size:.9rem;margin-top:-6px}
+    .recipe mark{padding:0 .15em;border-radius:4px}
+
+    footer{text-align:center;padding:18px;background:#444;color:#fff;margin-top:32px}
+
+    /* a11y focus */
+    a:focus,button:focus,input:focus{outline:3px solid rgba(255,19,240,.45);outline-offset:2px}
+
+    /* util */
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+      /* Category pills */
+    .pill-group{display:flex;gap:8px;flex-wrap:wrap}
+    .pill{padding:8px 12px;border-radius:999px;background:#fff;border:1px solid #ccc;box-shadow:var(--shadow);cursor:pointer;font-size:.95rem}
+    .pill[aria-pressed="true"]{background:var(--brand);color:#fff;border-color:transparent}
+    .pill:focus{outline:3px solid rgba(255,19,240,.45);outline-offset:2px}
+  </style>
 </head>
 <body>
-    <header>
-        <h1>Efrem Raimondo's Cookbook</h1>
-        <p>No-nonsense instructions to save your cooking (and your sanity).</p>
-    </header>
-   
-    <div class="container">
-        <input type="text" id="search-bar" placeholder="Search recipes..." onkeyup="filterRecipes()" /><div id="recommendation-box"></div>
-        
-        <section id="index">
-            <h2>Index</h2>
-            <ul id="recipe-index"></ul>
-        </section>
-        <section id="recipes">
-            <h2>Recipes</h2>
-            <div id="recipe-list"></div>
-        </section>
+  <header>
+    <h1>Efrem Raimondo's Cookbook</h1>
+    <p>No‑nonsense instructions to save your cooking (and your sanity).</p>
+  </header>
+
+  <main class="container">
+    <div class="tools" role="search">
+      <label for="search-bar" class="sr-only">Search recipes</label>
+      <input id="search-bar" type="search" placeholder="Search recipes, ingredients…" autocomplete="off" aria-describedby="count" />
+      <div id="count" aria-live="polite"></div>
+      <nav aria-label="Categories" class="pill-group" id="categories"></nav>
     </div>
-    <footer>
-        <p>&copy; 2024 Efrem Raimondo's Cookbook</p>
-    </footer>
+    </div>
 
-    <script>
+    <section id="index" aria-labelledby="index-title">
+      <h2 id="index-title">Index</h2>
+      <ul id="recipe-index"></ul>
+    </section>
 
+    <section id="recipes" aria-labelledby="recipes-title">
+      <h2 id="recipes-title">Recipes</h2>
+      <div id="recipe-list"></div>
+    </section>
+  </main>
 
+  <footer>
+    <p>&copy; <span id="year"></span> Efrem Raimondo's Cookbook</p>
+  </footer>
 
-        // Array of recipes
-        const recipes = [
-
-        {
+  <script>
+    // --- Data (your original content kept) ---
+    const recipes = [
+      {
         title: "Beurre Café de Paris",
+        categories: ["Sauce"],
         ingredients: [
-            "3 scallions, thinly sliced",
-            "1 clove of garlic",
-            "2 teaspoons of mustard",
-            "2 anchovies",
-            "6 teaspoons of Worcestershire sauce",
-            "Parsley, chopped",
-            "Zest of 1 lemon",
-            "5 teaspoons of lemon juice",
-            "1/2 stick of butter"
+          "3 scallions, thinly sliced",
+          "1 clove of garlic",
+          "2 teaspoons of mustard",
+          "2 anchovies",
+          "6 teaspoons of Worcestershire sauce",
+          "Parsley, chopped",
+          "Zest of 1 lemon",
+          "5 teaspoons of lemon juice",
+          "1/2 stick of butter"
         ],
         instructions: `
-            Thinly slice the 3 scallions. Melt part of the butter in a skillet and sauté the scallions until soft and lightly golden. Remove from heat and allow to cool.
+          Thinly slice the 3 scallions. Melt part of the butter in a skillet and sauté the scallions until soft and lightly golden. Remove from heat and allow to cool.
 
-            In a blender, combine the garlic clove, anchovies, parsley, mustard, Worcestershire sauce, lemon zest, lemon juice, and the remaining fresh butter. Add the sautéed scallions and blend everything together until smooth.
+          In a blender, combine the garlic clove, anchovies, parsley, mustard, Worcestershire sauce, lemon zest, lemon juice, and the remaining fresh butter. Add the sautéed scallions and blend everything together until smooth.
 
-            Blend until the mixture reaches a creamy, homogenous consistency. Add a pinch of salt to taste. Refrigerate before serving.
+          Blend until the mixture reaches a creamy, homogenous consistency. Add a pinch of salt to taste. Refrigerate before serving.
         `
-    },
-    {
-    title: "Filetto al Pepe Verde",
-    ingredients: [
-        "800 g whole beef tenderloin",
-        "30 g green peppercorns in brine",
-        "100 g fresh liquid cream",
-        "50 g Dijon mustard",
-        "120 g hot beef broth",
-        "30 g brandy",
-        "40 g clarified butter",
-        "Salt, to taste",
-        "All-purpose flour, as needed"
-    ],
-    instructions: `
-        Clean the tenderloin and cut it into 4 medallions of 200 g each. Tie each medallion with kitchen twine to maintain their shape. Lightly flour both sides of each medallion.
+      },
+      {
+        title: "Filetto al Pepe Verde",
+        categories: ["Meat","Beef"],
+        ingredients: [
+          "800 g whole beef tenderloin",
+          "30 g green peppercorns in brine",
+          "100 g fresh liquid cream",
+          "50 g Dijon mustard",
+          "120 g hot beef broth",
+          "30 g brandy",
+          "40 g clarified butter",
+          "Salt, to taste",
+          "All-purpose flour, as needed"
+        ],
+        instructions: `
+          Clean the tenderloin and cut it into 4 medallions of 200 g each. Tie each medallion with kitchen twine to maintain their shape. Lightly flour both sides of each medallion.
 
-        Heat the clarified butter in a skillet over medium-high heat and sear the medallions for 2 minutes on each side. Deglaze the pan with brandy and flambé, or allow the alcohol to evaporate.
+          Heat the clarified butter in a skillet over medium-high heat and sear the medallions for 2 minutes on each side. Deglaze the pan with brandy and flambé, or allow the alcohol to evaporate.
 
-        Lower the heat and add the drained green peppercorns, Dijon mustard, 50 g of cream, and 50 g of beef broth. Cook for another 2 minutes on each side, basting the meat with the sauce.
+          Lower the heat and add the drained green peppercorns, Dijon mustard, 50 g of cream, and 50 g of beef broth. Cook for another 2 minutes on each side, basting the meat with the sauce.
 
-        Remove the medallions and let them rest. In the same skillet, add the remaining cream and broth, and reduce the sauce until thickened.
+          Remove the medallions and let them rest. In the same skillet, add the remaining cream and broth, and reduce the sauce until thickened.
 
-        Return the medallions to the skillet for a few seconds, coat them with the sauce, and serve immediately.
-    `
-},
-{
-    title: "Poulet Crémeux à la Dijon",
-    ingredients: [
-        "150 g roasted potatoes (oven or air fryer)",
-        "175 g chicken breast or thigh, raw",
-        "1/2 onion, chopped",
-        "2 garlic cloves, minced",
-        "2 shallots (optional)",
-        "1 teaspoon olive oil",
-        "Bay leaf, to taste",
-        "2 teaspoons onion powder",
-        "2 teaspoons paprika",
-        "2 teaspoons Italian seasoning",
-        "2 teaspoons salt and black pepper (adjust to taste)",
-        "2 teaspoons Dijon mustard",
-        "1 cup vegetable or chicken broth",
-        "1/2 cup light cream",
-        "1/2 cup milk of choice",
-        "Fresh parsley for garnish"
-    ],
-    instructions: `
-        Roast the potatoes in the oven or air fryer at 200°C (390°F) for 20 minutes.
+          Return the medallions to the skillet for a few seconds, coat them with the sauce, and serve immediately.
+        `
+      },
+      {
+        title: "Poulet Crémeux à la Dijon",
+        categories: ["Meat","Chicken"],
+        ingredients: [
+          "150 g roasted potatoes (oven or air fryer)",
+          "175 g chicken breast or thigh, raw",
+          "1/2 onion, chopped",
+          "2 garlic cloves, minced",
+          "2 shallots (optional)",
+          "1 teaspoon olive oil",
+          "Bay leaf, to taste",
+          "2 teaspoons onion powder",
+          "2 teaspoons paprika",
+          "2 teaspoons Italian seasoning",
+          "2 teaspoons salt and black pepper (adjust to taste)",
+          "2 teaspoons Dijon mustard",
+          "1 cup vegetable or chicken broth",
+          "1/2 cup light cream",
+          "1/2 cup milk of choice",
+          "Fresh parsley for garnish"
+        ],
+        instructions: `
+          Roast the potatoes in the oven or air fryer at 200°C (390°F) for 20 minutes.
 
-        In a skillet or pot over high heat, add olive oil, chicken, and halved shallots (if using). Season with salt, black pepper, paprika, onion powder, Italian seasoning, and a bay leaf. Grill the chicken until fully cooked, approximately 10-12 minutes. Remove and set aside.
+          In a skillet or pot over high heat, add olive oil, chicken, and halved shallots (if using). Season with salt, black pepper, paprika, onion powder, Italian seasoning, and a bay leaf. Grill the chicken until fully cooked, approximately 10-12 minutes. Remove and set aside.
 
-        Lower the heat to medium, and in the same skillet, add minced garlic, chopped onion, paprika, Italian seasoning, and Dijon mustard. Sauté until the onion becomes translucent and fragrant, about 2-3 minutes.
+          Lower the heat to medium, and in the same skillet, add minced garlic, chopped onion, paprika, Italian seasoning, and Dijon mustard. Sauté until the onion becomes translucent and fragrant, about 2-3 minutes.
 
-        Pour in the vegetable or chicken broth, light cream, and milk. Mix well to combine all the ingredients. Let the sauce simmer for 5 minutes, allowing the flavors to blend and the sauce to thicken slightly.
+          Pour in the vegetable or chicken broth, light cream, and milk. Mix well to combine all the ingredients. Let the sauce simmer for 5 minutes, allowing the flavors to blend and the sauce to thicken slightly.
 
-        Remove the skillet from the heat and return the chicken and shallots to the sauce. Garnish with fresh parsley leaves.
+          Remove the skillet from the heat and return the chicken and shallots to the sauce. Garnish with fresh parsley leaves.
 
-        Serve the creamy Dijon chicken with the roasted potatoes. Enjoy your meal!
-    `
-},
-            {
-                 title: "Pasta",
-                ingredients: [
-                "300 g of flour",
-                "100 g of water + 1 egg (or 150 g of water if not using an egg)",
-                "A pinch of salt",
-                ],
-                instructions: `
-                In a large bowl, combine the flour and a pinch of salt.
-            If using an egg, lightly beat it and mix it with 100 g of water. If you prefer egg-free pasta, use an additional 50 g of water.
-            Create a well in the center of the flour and pour in the water (and the egg, if used). Start incorporating the flour into the liquids, mixing until a dough forms.
-            Transfer the dough onto a lightly floured surface and knead for about 10 minutes until it becomes smooth and elastic. If the dough is too sticky, add a little more flour; if it’s too dry, add a small amount of water.
-            Wrap the dough in plastic wrap (cling film) and let it rest in the refrigerator for 20 minutes. This resting time allows the gluten to relax, making the dough easier to roll out.
-            After resting, divide the dough into smaller portions. Using a pasta machine, begin rolling out the dough at the widest setting, gradually decreasing the thickness until you reach setting number 4.
-            Your pasta is now ready to be used in your favorite recipe. Cut it into your desired shape or use it as sheets for lasagna.
+          Serve the creamy Dijon chicken with the roasted potatoes. Enjoy your meal!
+        `
+      },
+      {
+        title: "Pasta",
+        categories: ["Pasta"],
+        ingredients: [
+          "300 g of flour",
+          "100 g of water + 1 egg (or 150 g of water if not using an egg)",
+          "A pinch of salt",
+        ],
+        instructions: `
+          In a large bowl, combine the flour and a pinch of salt.
+          If using an egg, lightly beat it and mix it with 100 g of water. If you prefer egg-free pasta, use an additional 50 g of water.
+          Create a well in the center of the flour and pour in the water (and the egg, if used). Start incorporating the flour into the liquids, mixing until a dough forms.
+          Transfer the dough onto a lightly floured surface and knead for about 10 minutes until it becomes smooth and elastic. If the dough is too sticky, add a little more flour; if it’s too dry, add a small amount of water.
+          Wrap the dough in plastic wrap (cling film) and let it rest in the refrigerator for 20 minutes. This resting time allows the gluten to relax, making the dough easier to roll out.
+          After resting, divide the dough into smaller portions. Using a pasta machine, begin rolling out the dough at the widest setting, gradually decreasing the thickness until you reach setting number 4.
+          Your pasta is now ready to be used in your favorite recipe. Cut it into your desired shape or use it as sheets for lasagna.
+        `
+      },
+      {
+        title: "Gnocchi",
+        categories: ["Pasta"],
+        ingredients: [
+          "4 large potatoes (about 800 g)",
+          "All-purpose flour (as needed, about 200–300 g)",
+          "Salt, to taste"
+        ],
+        instructions: `
+          Place the potatoes in a large pot of salted water. Bring to a boil and cook until tender, about 20–25 minutes. A fork should easily pierce through them.
 
-                `
-            },
-            {
-    title: "Gnocchi",
-    ingredients: [
-        "4 large potatoes (about 800 g)",
-        "All-purpose flour (as needed, about 200–300 g)",
-        "Salt, to taste"
-    ],
-    instructions: `
-        Place the potatoes in a large pot of salted water. Bring to a boil and cook until tender, about 20–25 minutes. A fork should easily pierce through them.
+          Once cooked, drain the potatoes and let them cool slightly. Peel the potatoes and mash them thoroughly until you achieve a smooth consistency.
 
-        Once cooked, drain the potatoes and let them cool slightly. Peel the potatoes and mash them thoroughly until you achieve a smooth consistency.
+          Gradually add the flour to the mashed potatoes along with a pinch of salt. Mix until the dough is no longer sticky but still soft and workable. Avoid overworking the dough.
 
-        Gradually add the flour to the mashed potatoes along with a pinch of salt. Mix until the dough is no longer sticky but still soft and workable. Avoid overworking the dough.
+          Divide the dough into smaller portions. Roll each portion into a long, thin rope about 2 centimeters in diameter. Cut each rope into small pieces, about 2 centimeters long.
 
-        Divide the dough into smaller portions. Roll each portion into a long, thin rope about 2 centimeters in diameter. Cut each rope into small pieces, about 2 centimeters long.
+          Gently press each piece onto the tines of a fork, rolling it slightly to create ridges. This texture helps the sauce adhere better to the gnocchi.
 
-        Gently press each piece onto the tines of a fork, rolling it slightly to create ridges. This texture helps the sauce adhere better to the gnocchi.
+          Bring a large pot of salted water to a boil. Cook the gnocchi in small batches until they float to the surface, about 2–3 minutes.
 
-        Bring a large pot of salted water to a boil. Cook the gnocchi in small batches until they float to the surface, about 2–3 minutes.
-
-        Remove the gnocchi with a slotted spoon and serve immediately with your preferred sauce.
-    `
-},
-{
+          Remove the gnocchi with a slotted spoon and serve immediately with your preferred sauce.
+        `
+      },
+      {
         title: "Pizza",
+        categories: ["Bread","Main"],
         ingredients: [
-            "250 ml lukewarm water",
-            "400 g all-purpose flour",
-            "2 tablespoons olive oil",
-            "3 teaspoons salt",
-            "1 teaspoon granulated sugar",
-            "1 tablespoon dry yeast or 1/4 block of fresh yeast"
+          "250 ml lukewarm water",
+          "400 g all-purpose flour",
+          "2 tablespoons olive oil",
+          "3 teaspoons salt",
+          "1 teaspoon granulated sugar",
+          "1 tablespoon dry yeast or 1/4 block of fresh yeast"
         ],
         instructions: `
-            In a bowl, dissolve the yeast (dry or fresh) in the lukewarm water with the sugar. Let it rest for a few minutes until the yeast begins to foam.
+          In a bowl, dissolve the yeast (dry or fresh) in the lukewarm water with the sugar. Let it rest for a few minutes until the yeast begins to foam.
 
-            Gradually add the flour to the bowl, mixing by hand as you go. Continue adding and mixing until a dough forms.
+          Gradually add the flour to the bowl, mixing by hand as you go. Continue adding and mixing until a dough forms.
 
-            Add the salt and olive oil to the dough and continue mixing by hand until all ingredients are fully incorporated.
+          Add the salt and olive oil to the dough and continue mixing by hand until all ingredients are fully incorporated.
 
-            Transfer the dough to a lightly floured surface and knead by hand for about 10 minutes, using the palms of your hands to push the dough forward, then folding it back and turning slightly each time, until it becomes smooth and elastic.
+          Transfer the dough to a lightly floured surface and knead by hand for about 10 minutes, using the palms of your hands to push the dough forward, then folding it back and turning slightly each time, until it becomes smooth and elastic.
 
-            Place the dough in a bowl lightly greased with olive oil, cover it with plastic wrap, and let it rise in a warm place for about 1–2 hours, or until it doubles in size.
+          Place the dough in a bowl lightly greased with olive oil, cover it with plastic wrap, and let it rise in a warm place for about 1–2 hours, or until it doubles in size.
 
-            Once the dough has risen, gently deflate it with your hands and transfer it to a lightly floured surface.
+          Once the dough has risen, gently deflate it with your hands and transfer it to a lightly floured surface.
 
-            Roll out the dough with your hands to achieve the desired shape and thickness.
+          Roll out the dough with your hands to achieve the desired shape and thickness.
 
-            Add your preferred toppings to the surface of the dough.
+          Add your preferred toppings to the surface of the dough.
 
-            Bake in a preheated oven at 170°C (340°F) for 20–25 minutes, or until the pizza is golden and crispy.
+          Bake in a preheated oven at 170°C (340°F) for 20–25 minutes, or until the pizza is golden and crispy.
         `
-    },
-            {
-    title: "Focaccia",
-    ingredients: [
-        "500 g type 0 flour",
-        "340 g water (room temperature)",
-        "7 g fresh brewer’s yeast",
-        "25 g extra virgin olive oil",
-        "10 g fine salt",
-        "60 g extra virgin olive oil (for topping)",
-        "Maldon salt (q.b.)"
-    ],
-    instructions: `
-        In a bowl, mix flour with crumbled yeast. Add water gradually, stirring until absorbed. When dough starts forming, transfer to a work surface.
-
-        Knead energetically, stretching dough and folding it back, turning 90° each time. Once smoother, add olive oil in 3–4 batches, letting it absorb fully. Finally, add salt and knead until incorporated. Cover dough with a bowl and rest 15 minutes.
-
-      Perform slap & fold folds: lift dough, slap it on the counter, and fold over itself 2–3 times. Rest covered for 15 minutes. Repeat at least twice, resting 15 minutes between each round.
-
-      Place dough in an oiled bowl, cover with plastic wrap, and let rise at room temperature (26–28 °C) for about 3 hours until tripled in volume.
-
-       Oil a 25×38 cm baking tray. Transfer dough and gently stretch toward edges with your fingers. If it resists, rest covered 5 minutes, then continue. Let rise covered for another 1 hour.
-
-        Pour 60 g olive oil on top, dimple surface with fingertips, and sprinkle with Maldon salt.
-
-       Bake in preheated static oven at 200 °C for about 30 minutes on the lowest rack until golden. Serve hot.
-    `
-},
-
-    {
-        title: "Pane (Bread)",
-        ingredients: [
-            "800 g flour",
-            "450 g water",
-            "Brewer's yeast (as needed)",
-            "2 tablespoons olive oil",
-            "1 heaping tablespoon salt",
-            "1 teaspoon honey"
-        ],
-        instructions: `
-            In a large bowl, pour the flour and create a well in the center.
-
-            Dissolve the brewer's yeast in a small amount of lukewarm water and pour it into the well.
-
-            Add the remaining water, olive oil, salt, and honey. Begin mixing until the dough is smooth and homogeneous.
-
-            Let the dough rest for 20 minutes, covered with a cloth.
-
-            (For quick bread) After 20 minutes, divide the dough into loaves of the desired size. Cover the loaves and let them rise in a warm place for 2–4 hours until they double in size. Proceed to bake.
-
-            (For slow fermentation bread) Prepare the dough as above, then refrigerate it for 12–18 hours to allow it to mature. After maturation, shape the dough into loaves and let them rise for 3–4 hours at room temperature. Proceed to bake.
-
-            Before baking, make shallow cuts across the top of each loaf to ensure even cooking.
-
-            Bake in a preheated static oven at 250°C (480°F) until fully cooked and golden brown.
-        `
-    },
-    {
-        title: "Piadina",
-        ingredients: [
-            "500 g flour",
-            "250 ml water (or 150 ml water + 100 ml milk)",
-            "50 g margarine or butter",
-            "1 tablespoon olive oil",
-            "1 tablespoon salt",
-            "10 g baking powder"
-        ],
-        instructions: `
-            In a large bowl, sift together the flour and baking powder. Add the salt and mix well.
-
-            Melt the margarine (or butter) and add it to the flour mixture along with the olive oil.
-
-            If using both water and milk, mix them together, then gradually add the liquid to the flour mixture, kneading until a smooth and homogeneous dough forms.
-
-            Cover the dough with a cloth and let it rest at room temperature for 30 minutes.
-
-            After resting, divide the dough into 6 equal portions and shape them into balls. Cover the balls and let them rest for another 30 minutes.
-
-            Roll out each ball on a lightly floured surface with a rolling pin into a thin disk, about 2-3 mm thick.
-
-            Heat a non-stick skillet over medium-high heat. Cook each piadina in the hot skillet for about 2-3 minutes on each side, or until golden spots appear on the surface. Flip the piadina once during cooking.
-        `
-    },
-            {
-    title: "Mozzarella Fritta",
-    ingredients: [
-        "500 g mozzarella",
-        "3 medium eggs",
-        "20 g whole milk",
-        "All-purpose flour (q.b.)",
-        "Breadcrumbs (q.b.)",
-        "Fine salt (q.b.)",
-        "Black pepper (q.b.)",
-        "1 L peanut oil (for frying)"
-    ],
-    instructions: `
-Cut mozzarella into slices about 2 cm thick, then into cubes. Place in a colander and let drain well to remove excess liquid.
-        
-In a bowl, beat the eggs with salt and pepper, then add the milk.
-        
-Pat the mozzarella cubes dry. Coat first in flour, then dip in the egg mixture, and finally roll in breadcrumbs. For extra crispiness, repeat the coating in egg and breadcrumbs (double breading).
-        
-Heat peanut oil in a deep pan to 170–180 °C. Fry a few cubes at a time for about 2 minutes until golden and crunchy.
-        
-Drain on paper towels to remove excess oil. Serve immediately while the mozzarella is still melted and stretchy inside.
-    `
-},
-            {
-    title: "Olive all’Ascolana",
-    ingredients: [
-        "750 g large green olives",
-        "Fresh wild fennel (q.b.)",
-        "300 g beef",
-        "150 g pork",
-        "50 g chicken breast",
-        "½ carrot",
-        "½ celery stalk",
-        "½ onion",
-        "2 cloves",
-        "50 g Parmigiano Reggiano DOP, grated",
-        "1 egg",
-        "70 g white wine",
-        "20 g extra virgin olive oil",
-        "Nutmeg (q.b.)",
-        "Fine salt (q.b.)",
-        "Black pepper (q.b.)",
-        "All-purpose flour (q.b.)",
-        "Eggs (q.b.)",
-        "Breadcrumbs (q.b.)",
-        "Sunflower oil (q.b., for frying)"
-    ],
-    instructions: `
-    Soak olives for 12 hours in water flavored with fresh fennel.
-
-    Prepare the filling: Cut beef, pork, and chicken into small pieces. In a pot, heat olive oil and sauté carrot, celery, and half an onion studded with cloves for a few minutes. Add beef and pork, season with pepper, cover, and cook for about 20 minutes. Add chicken, deglaze with white wine, season with salt, and continue cooking with lid on for about 1 hour.
-
-    Remove cloves, let the mixture cool, then grind meat and vegetables in a meat grinder or blender. Transfer to a bowl, add Parmigiano, egg, and grated nutmeg. Mix until smooth.
-
-    Pit the olives by cutting them in a spiral. Stuff each olive with some filling, then reassemble to their original shape.
-
-    Prepare three bowls: one with flour, one with beaten eggs seasoned with salt, and one with breadcrumbs. Dredge olives in flour, dip in egg, then coat with breadcrumbs. For extra crunch, repeat egg and breadcrumb steps.
-
-    Heat sunflower oil to 180 °C. Fry olives in small batches for about 2 minutes until golden. Drain on paper towels and serve warm.
-    `
-},
-            {
-    title: "Salsa di Pomodoro",
-    ingredients: [
-        "Tomato passata (q.b.)",
-        "2 garlic cloves",
-        "Extra virgin olive oil (q.b.)",
-        "Fresh or dried chili (q.b.)",
-        "Fresh basil leaves",
-        "Fine salt (q.b.)",
-        "Black pepper (q.b.)",
-        "A pinch of sugar (to balance acidity)"
-    ],
-    instructions: `
-        Heat a generous drizzle of olive oil in a pan with crushed garlic cloves and chili. Sauté gently without burning the garlic.
-
-        Add tomato passata, season with salt, pepper, and a pinch of sugar. Stir and simmer on medium-low heat for 20–30 minutes until thickened and fragrant.
-
-     At the end of cooking, add fresh basil leaves torn by hand.
-
-        Toss with freshly drained pasta and serve immediately.
-    `
-},
-{
-    title: "Spaghetti Aglio, Olio e Peperoncino",
-    ingredients: [
-        "320 g spaghetti",
-        "3–4 garlic cloves",
-        "1–2 fresh or dried chilies",
-        "Extra virgin olive oil (q.b.)",
-        "Fine salt (q.b.)",
-        "Black pepper (q.b.)"
-    ],
-    instructions: `
-      Cook spaghetti in plenty of salted boiling water until al dente.
-
-      Meanwhile, in a large pan, heat a generous drizzle of olive oil with crushed garlic cloves and chilies. Let infuse gently over low heat until garlic turns golden. Remove garlic if a milder flavor is preferred.
-
-      Drain pasta, reserving some cooking water. Toss spaghetti in the flavored oil, adding a splash of cooking water to help bind the sauce.
-
-       Finish with freshly ground black pepper and serve immediately while hot.
-    `
-},
-            {
-    title: "Fettuccine Alfredo",
-    ingredients: [
-        "200 g Parmigiano Reggiano DOP (24 months aged)",
-        "100 g butter (room temperature)",
-        "Fine salt (q.b.)",
-        "Black pepper (q.b.)",
-        "400 g fresh fettuccine (serves 4)"
-    ],
-    instructions: `
-        Cook fettuccine in plenty of salted boiling water for about 1 minute.
-
-        Meanwhile, place softened butter in a pan and add a little pasta cooking water to begin melting it.
-
-        Drain fettuccine directly into the pan with butter, with heat off. The pasta’s heat will gently melt the butter while keeping it creamy. Toss carefully with tongs or spoons to avoid breaking noodles.
-
-        Gradually add grated Parmigiano, mixing vigorously to create a creamy emulsion. Adjust texture with more pasta water until smooth and velvety.
-
-        Season with salt if needed and finish with plenty of freshly ground black pepper.
-
-        Serve immediately while hot.
-    `
-},
-{
-    title: "Spaghetti all’Assassina",
-    ingredients: [
-        "400 g spaghetti",
-        "1 L hot water",
-        "2–3 tbsp tomato paste",
-        "2 garlic cloves",
-        "1–2 fresh or dried chilies",
-        "Extra virgin olive oil (q.b.)",
-        "Fine salt (q.b.)"
-    ],
-    instructions: `
-      In a pot, dissolve tomato paste in 1 L of hot water, mixing well. Keep this red broth warm near the stove.
-
-       In a large cast iron or steel pan, sauté sliced garlic and chili in olive oil. Add 2 tbsp of tomato paste or passata to create a sauce base.
-
-      Place raw spaghetti directly into the pan (do not boil first). Stir well to coat in the tomato base.
-
-       Begin adding the red broth one ladle at a time, as if cooking risotto. Let pasta absorb liquid before adding more. Continue, stirring often, until spaghetti is al dente.
-
-     During cooking, a slightly burnt, crispy layer will form at the bottom — this is the signature of Spaghetti all’Assassina, with caramelized and charred bits.
-
-      Once pasta is cooked and coated in the spicy red sauce, remove from heat and rest for 30 seconds.
-
-        Serve immediately, hot and slightly “burnt” as tradition requires.
-    `
-},
-{
-    title: "Pasta all’Amatriciana",
-    ingredients: [
-        "1 kg pasta (rigatoni or bucatini)",
-        "400 g guanciale (preferably from Amatrice)",
-        "800 g peeled tomatoes (or tomato passata)",
-        "1 onion (optional)",
-        "1 fresh or dried chili",
-        "1 glass dry white wine",
-        "Extra virgin olive oil (q.b.)",
-        "Coarse salt (q.b.)",
-        "200 g Pecorino Romano, grated"
-    ],
-    instructions: `
-      Cut guanciale into thick strips. Reserve rind for other recipes (e.g., beans).
-
-    If using, slice onion not too thin. In a large pan, heat a generous drizzle of olive oil, add onion, chili, and a pinch of coarse salt. Sauté gently.
-
-     Add guanciale and cook over medium heat until fat turns translucent. Deglaze with white wine and let evaporate.
-
-      Add crushed peeled tomatoes (or passata). Simmer sauce for 30–40 minutes until reduced and flavorful.
-
-       Meanwhile, cook pasta in salted boiling water. Drain al dente and toss directly in the pan with the sauce.
-
-       Finish with a drizzle of raw olive oil and plenty of grated Pecorino Romano. Mix well and serve immediately.
-    `
-},
-
-
-    {
-        title: "Ragù Bolognese",
-        ingredients: [
-            "700 g minced meat",
-            "4 onions, diced",
-            "4 large carrots, sliced",
-            "Olive oil, as needed",
-            "Salt, to taste",
-            "Pepper, to taste",
-            "Rosemary, to taste",
-            "MSG (optional)",
-            "Garlic (optional)",
-            "Fresh chili or chili powder (optional)",
-            "700 g tomato puree",
-            "5 tablespoons double-concentrated tomato paste",
-            "1 liter water"
-        ],
-        instructions: `
-            Dice the onions and slice the carrots. Heat some olive oil in a large pan.
-
-            Add the minced meat and sauté until well browned. Drain the meat using a kitchen sieve to remove excess water and set aside.
-
-            In the same pan, add more olive oil and sauté the onions until golden. Add the sliced carrots to the onions.
-
-            Season with salt, pepper, rosemary, and MSG if used. Add chili or chili powder for extra heat, if desired. Stir well to coat the vegetables with the spices.
-
-            Return the browned meat to the pan. Add the tomato puree and double-concentrated tomato paste. Mix well to combine.
-
-            Add a liter of water and stir thoroughly. Let it simmer over medium heat for about 45 minutes for a richer flavor. If in a hurry, cook on high heat for 20 minutes, stirring frequently.
-        `
-    },
-    {
-        title: "Polpette al Sugo",
-        ingredients: [
-            "450 g ground beef",
-            "110 g finely chopped prosciutto or mortadella",
-            "30 g Pecorino or Parmesan cheese, grated",
-            "3 garlic cloves, minced",
-            "1 egg",
-            "30 g panko breadcrumbs",
-            "9 g fine sea salt",
-            "Black pepper, to taste",
-            "2 g ground fennel seeds (optional)",
-            "60 ml extra virgin olive oil",
-            "4 garlic cloves, sliced",
-            "3 g chili flakes",
-            "700 ml tomato sauce",
-            "1 bunch fresh basil",
-            "Grated Parmesan and chiffonade basil for garnish"
-        ],
-        instructions: `
-            Mix ground beef, prosciutto, cheese, minced garlic, egg, breadcrumbs, salt, pepper, and fennel seeds. Form into 2.5–3 cm meatballs.
-
-            Heat 1–2 tablespoons of olive oil in a pan over medium heat. Cook the meatballs for 8–10 minutes, turning occasionally, until golden brown. Remove and set aside.
-
-            In the same pan, add more oil if necessary, along with sliced garlic and chili flakes. Cook for 1–2 minutes. Add the tomato sauce and simmer for 10–15 minutes.
-
-            Return the meatballs to the pan, add fresh basil, and cook for another 5–10 minutes.
-
-            Garnish with grated Parmesan, chiffonade basil, and black pepper before serving.
-        `
-    },
-    {
-        title: "Ripieno di Zucca (Pumpkin Filling)",
-        ingredients: [
-            "500 g Delica pumpkin, cleaned",
-            "50 g Mantuan apple mustard, chopped",
-            "50 g Parmigiano Reggiano DOP, grated",
-            "25 g amaretti cookies, crushed",
-            "Zest of 1/2 lemon",
-            "Nutmeg, to taste",
-            "Fine salt, to taste",
-            "Black pepper, to taste"
-        ],
-        instructions: `
-            Cook the pumpkin in the oven or boil it until soft.
-
-            Once cooked, let the pumpkin cool slightly. In a blender, combine the cooked pumpkin, chopped apple mustard, grated Parmigiano Reggiano, crushed amaretti cookies, grated lemon zest, nutmeg, salt, and black pepper. Blend everything until smooth and homogeneous.
-        `
-    },
-            {
-    title: "Purè di Patate alla Efy",
-    ingredients: [
-        "1 kg Ratte potatoes",
-        "250 g unsalted butter, cold and cubed",
-        "250 ml whole milk, hot",
-        "Salt (q.b.)",
-        "Optional: ground white pepper (q.b.)"
-    ],
-    instructions: `
-       Wash potatoes and place in a pot with cold salted water. Bring to a boil, then lower heat and simmer for 20–30 minutes until tender.
-
-      Drain potatoes and keep warm in a container covered with a cloth. Peel while still hot and transfer to another container lined with perforated plastic wrap to retain heat.
-
-       Press potatoes through a potato ricer directly into a pot. Heat over medium for 3–5 minutes, stirring, to evaporate excess moisture. Then pass through a fine sieve with a spatula for a silky texture.
-
-      Return potatoes to the pot over medium heat and gradually incorporate cold butter cubes, whisking to form an emulsion. Continue until smooth and creamy.
-
-    Add hot milk little by little, stirring constantly, until desired creamy consistency is reached. Adjust salt and, if desired, add a pinch of white pepper.
-
-        Serve immediately, hot and velvety.
-    `
-},
-
-    {
-        title: "Shepherd's Pie",
-        ingredients: [
-            "3 trumpet mushrooms (or 6 champignon mushrooms), chopped",
-            "1 medium yellow onion, diced",
-            "1 large carrot, diced",
-            "1 celery stalk, diced",
-            "4 garlic cloves, thinly sliced",
-            "680 g ground beef or lamb",
-            "170 g finely minced pancetta",
-            "30 g tomato paste",
-            "5 g Worcestershire sauce",
-            "6 g fresh rosemary",
-            "5 g fresh thyme, chopped",
-            "A splash of red wine",
-            "1 cup beef broth",
-            "140 g frozen peas",
-            "75 g Parmigiano Reggiano, grated",
-            "75 g Gruyère cheese, grated"
-        ],
-        instructions: `
-            Brown the meat: Heat a medium-sized pot or skillet over medium-high heat until smoking. Add the ground meat, press it down, and sear for 3 minutes. Flip and repeat on the other side. Once both sides are browned, break up the meat finely, season with salt and pepper, and continue cooking over medium heat until evenly browned. Drain and set aside.
-
-            In the same pot, melt butter over medium heat. Once it bubbles, add diced onion, celery, carrot, and sliced garlic. Season with salt and pepper. Sauté for 2-3 minutes, stirring occasionally.
-
-            Once the vegetables soften, add the tomato paste and sauté for 2 minutes until caramelized. Deglaze with red wine, broth, or vinegar. Add Worcestershire sauce, bring to a boil, and reduce until the liquid evaporates.
-
-            Return the meat to the pot, season with salt and pepper, and mix well. Cook for 1-2 minutes. Add the frozen peas and stir until warmed through.
-
-            Transfer the meat and vegetable mixture to a baking dish, pressing it down evenly. Cover with mashed potatoes, spread evenly, and sprinkle grated Parmigiano Reggiano and Gruyère on top. Optionally, create patterns with a fork.
-
-            Bake in a preheated oven at 170°C (340°F) for 30 minutes. Let it rest for 20 minutes before serving.
-        `
-    },
-            {
-    title: "Beef Wellington",
-    ingredients: [
-        "650 g beef tenderloin (center cut, Chateaubriand)",
-        "2 tbsp (24 ml) high-smoke-point oil (canola or similar)",
-        "Salt and black pepper (q.b.)",
-        "Dijon mustard (for brushing)",
-        "1–1.5 sheets puff pastry",
-        "6–8 slices prosciutto crudo",
-        "468 g mushrooms (champignon, cremini, or mixed)",
-        "2 shallots",
-        "3 garlic cloves",
-        "2 tbsp (30 ml) extra virgin olive oil",
-        "3 tbsp (44 ml) whiskey (optional)",
-        "Leaves from 2 sprigs fresh thyme (optional)",
-        "Salt and black pepper (q.b.)",
-        "51 g all-purpose flour",
-        "140 ml whole milk",
-        "1 egg",
-        "Salt (q.b.)",
-        "2 egg yolks",
-        "1 tbsp (14 ml) water"
-    ],
-    instructions: `
-       Finely chop mushrooms, shallots, and garlic. Heat olive oil over medium heat and sauté shallots and garlic until translucent. Add mushrooms, season with salt, and cook until liquid evaporates (5–8 minutes). Add whiskey and thyme, let reduce, then cool. This is the duxelles.
-
-       Prepare the crêpe: whisk flour, milk, egg, and a pinch of salt into a smooth batter. Cook a thin crêpe in a lightly buttered non-stick pan for 1–2 minutes per side. Set aside.
-
-      Pat beef dry with paper towels, season generously with salt and pepper. In a hot pan with smoking oil, sear beef for 1.5–2 minutes per side (including ends). Immediately brush with Dijon mustard while hot. Let cool to room temperature.
-
-        Assemble: place crêpe on plastic wrap, layer prosciutto slices, spread mushroom duxelles, then place beef in the center. Roll tightly using the wrap, seal well, and chill 30–60 minutes.
-
-      Roll puff pastry to 3 mm thick. Place wrapped beef in center, enclose fully, and seal edges. Optionally decorate with lattice from extra pastry. Brush entire surface with egg yolk–water mixture.
-
-       Bake at 200 °C fan (or 220 °C static) for 35–40 minutes until pastry is golden. For medium-rare beef, internal temperature should reach 50–52 °C.
-
-       Rest 10 minutes before slicing. Serve with sides of choice and, optionally, a sauce made by reducing chicken stock by 75% and whisking in cold butter.
-    `
-},
-
-    {
-        title: "Fish and Chips",
-        ingredients: [
-            "900 g cod, cut into 5–7 cm pieces",
-            "5 g salt",
-            "150 g all-purpose flour",
-            "1 teaspoon baking powder",
-            "3 g garlic powder",
-            "296 ml cold beer",
-            "Extra flour for dusting",
-            "Oil for frying"
-        ],
-        instructions: `
-            Season the cod with salt on all sides and let it rest at room temperature for 8 minutes. In a medium bowl, combine flour, baking powder, and garlic powder. Mix until uniform. Gradually add the cold beer, stirring to form a smooth batter.
-
-            Pat the cod dry with paper towels to remove excess moisture. Lightly coat the fish pieces with flour, shaking off the excess. Dip the floured pieces into the batter, ensuring they are fully coated.
-
-            Heat oil in a deep skillet or fryer to 175°C (347°F). Fry the cod for 3–4 minutes, turning until golden brown and cooked through. Remove the fish and let it drain on a rack. Season with a pinch of salt while still hot.
-
-            Repeat the process with the remaining fish. Serve the cod with ketchup, tartar sauce, or your favorite potatoes.
-        `
-    },
-    {
-        title: "General Tso's Chicken",
-        ingredients: [
-            "2 egg whites",
-            "7 tablespoons soy sauce",
-            "3 tablespoons Chinese cooking wine",
-            "3 tablespoons vodka",
-            "1/4 teaspoon baking soda",
-            "1 cup + 4 tablespoons cornstarch",
-            "700 g boneless, skinless chicken thighs",
-            "1 cup all-purpose flour",
-            "1 teaspoon instant yeast",
-            "1 teaspoon salt",
-            "3 tablespoons reserved marinade",
-            "4 tablespoons Chinese cooking wine",
-            "1 tablespoon rice vinegar",
-            "1 tablespoon chicken broth",
-            "1/4 cup sugar",
-            "1 teaspoon toasted sesame oil",
-            "6 green onions",
-            "4 garlic cloves",
-            "5 cm piece of ginger",
-            "6–12 dried chilies (optional)"
-        ],
-        instructions: `
-            Prepare the marinade: In a bowl, whisk two egg whites until foamy. Add 3 tablespoons soy sauce, 3 tablespoons Chinese cooking wine, and 3 tablespoons vodka. Reserve 3 tablespoons of this mixture. To the remaining marinade, add 1/4 teaspoon baking soda and 3 tablespoons cornstarch, mixing until smooth. Cut 700 g of boneless chicken thighs into 3 cm cubes and marinate for 30 minutes.
-
-            While the chicken marinates, prepare the sauce: In a separate bowl, mix 4 tablespoons soy sauce, 1 tablespoon rice vinegar, 4 tablespoons Chinese cooking wine, 4 tablespoons chicken broth, 1/4 cup sugar, 1 teaspoon toasted sesame oil, and 1 tablespoon cornstarch. Mix until smooth. Finely chop 6 green onions, 4 garlic cloves, and a 5 cm piece of ginger, setting them aside for later.
-
-            Cook the vegetables and sauce: In a skillet over medium-high heat, toast the dried chilies (optional). Sauté the chopped green onions, garlic, and ginger in a little oil. Add the chilies when the vegetables are golden. Pour in the sauce mixture and cook until it thickens.
-
-            For the coating: In a tray, mix 1 cup all-purpose flour, the remaining cornstarch, 1 teaspoon baking powder, and 1 teaspoon salt. Add the reserved marinade and mix until crumbly.
-
-            Dredge each piece of marinated chicken in the coating mixture, ensuring it's fully covered. Heat oil in a large skillet for frying. Fry the coated chicken until golden and cooked through. Drain on a wire rack or paper towels.
-
-            To serve, toss the fried chicken in the skillet with the prepared sauce. Gently stir to coat the chicken without breaking the crust. Garnish with some chopped green onions and serve with rice.
-        `
-    },
-    {
-        title: "Sweet and Sour Chicken",
-        ingredients: [
-            "30 g sugar",
-            "52 ml ketchup",
-            "5–10 ml Sriracha",
-            "45 ml rice vinegar",
-            "150 ml water",
-            "Salt, to taste",
-            "30 g cornstarch",
-            "2.5 cm piece of fresh ginger",
-            "3 garlic cloves",
-            "75 g red onion",
-            "120 g red bell pepper",
-            "120 g green bell pepper",
-            "450 g boneless chicken thighs",
-            "95 g all-purpose flour",
-            "4 g baking powder",
-            "2 g baking soda",
-            "158 ml ice-cold water",
-            "15 ml vegetable oil (for batter)",
-            "Vegetable oil for frying",
-            "Fried garlic (for garnish)"
-        ],
-        instructions: `
-            Cut the red onion, red bell pepper, and green bell pepper into 2.5 cm pieces and set aside.
-
-            Season the chicken pieces with salt and let them rest, covered, at room temperature for about 8 minutes.
-
-            In a bowl, mix the dry ingredients (flour, cornstarch, baking powder, and baking soda). Add the ice-cold water and mix well. Stir in 15 ml of vegetable oil to create a smooth batter.
-
-            Heat vegetable oil in a deep pot to 175°C (347°F). Dip the chicken pieces into the batter and fry in batches for 2–4 minutes or until golden and crispy. Remove and place on paper towels to drain excess oil.
-
-            In a wok or deep skillet, heat 30 ml of vegetable oil over medium-high heat. Add the red onion, red bell pepper, and green bell pepper. Stir-fry for 1–2 minutes until slightly softened but still crisp.
-
-            Lower the heat to medium. Add the fried chicken to the wok along with the vegetables. In a small bowl, mix sugar, ketchup, Sriracha, rice vinegar, hot water, and minced ginger. Pour the sauce into the wok and bring it to a boil. Stir cornstarch with water to make a slurry, then add it to the sauce to thicken. Cook for 1–2 minutes, ensuring the chicken and vegetables are well coated.
-
-            Add minced garlic just before serving for a fresh, aromatic touch. Serve hot over steamed rice, garnished with fried garlic if desired.
-        `
-    }, 
-            
-    {
-        title: "Cholo Mahiche (Braised Lamb Shanks with Saffron Rice)",
-        ingredients: [
-            "2 lamb shanks",
-            "5 onions, thinly sliced",
-            "Oil, for sautéing",
-            "1 teaspoon cumin",
-            "1 teaspoon ground coriander",
-            "4 cardamom pods",
-            "2 teaspoons cinnamon",
-            "1 teaspoon garlic powder",
-            "2 teaspoons ground cinnamon",
-            "Black pepper, to taste",
-            "1 teaspoon sweet paprika",
-            "A pinch of chili powder",
-            "1 teaspoon turmeric",
-            "2–3 garlic cloves, minced",
-            "3 sweet peppers, sliced",
-            "Saffron, to taste",
-            "Salt, to taste",
-            "Green sweet peppers (optional)"
-        ],
-        instructions: `
-            Sauté the thinly sliced onions in a pot or pressure cooker with some oil. Add cumin, ground coriander, cardamom pods, cinnamon, garlic powder, ground cinnamon, black pepper, sweet paprika, chili powder, turmeric, and minced garlic. Sauté for 3–4 minutes.
-
-            Add the sliced sweet peppers to the mixture and sauté well. Add the lamb shanks and sear thoroughly on all sides. Pour boiling water into the pot and close the lid. If using a pressure cooker, cook for 90 minutes; for a regular pot, cook for 210 minutes.
-
-            After cooking, add saffron, salt, and green sweet peppers to the pot. Let cook for another 15 minutes. If using a pressure cooker, partially close the lid during this time.
-        `
-    },
-    {
-        title: "Tahchin (Persian Saffron Rice Cake)",
-        ingredients: [
-            "2 cups rice",
-            "Salt, to taste",
-            "Boiling water",
-            "2 egg yolks",
-            "250 g mixed yogurt",
-            "A few teaspoons dissolved saffron",
-            "1.5 teaspoons cardamom water",
-            "4 tablespoons oil"
-        ],
-        instructions: `
-            Add rice and salt to boiling water. After 8 minutes, drain the rice and let it rest.
-
-            In a large bowl, thoroughly mix the following ingredients: 
-            - 2 egg yolks 
-            - 250 g yogurt 
-            - A few teaspoons of dissolved saffron 
-            - Salt 
-            - 1.5 teaspoons of cardamom water 
-            - 4 tablespoons of oil.
-
-            Once the mixture is uniform, add most of the rice to the tahchin mixture, reserving a small portion of rice.
-
-            Grease the bottom of a non-stick pot and pour in the tahchin mixture. Add the reserved rice on top. Reduce the heat to low, cover the pot, and let cook until the bottom becomes crispy and golden (about 30–40 minutes).
-        `
-    },
-            {
-    title: "Hummus bil Lahme",
-    ingredients: [
-        "425 g dried chickpeas",
-        "120 g tahini (sesame paste)",
-        "Juice of 1 lemon (≈60 ml)",
-        "3–4 ice cubes or 80 ml ice-cold water",
-        "Salt to taste",
-        "Optional: 1 garlic clove",
-        "45 g ghee",
-        "225 g lean beef (sirloin or rump), cut into small cubes",
-        "35 g pine nuts",
-        "1 tbsp pomegranate molasses",
-        "1 tsp ground sumac",
-        "Salt to taste"
-    ],
-    instructions: `
-        Place chickpeas in a large bowl, cover with cold water, and soak overnight until tripled in volume.
-        
-        Drain chickpeas, transfer to a pot with fresh water, and add 1 tsp baking soda. Bring to a boil, then lower to medium heat and skim the foam. Cook for about 1 hour until soft enough to mash with a spoon.
-        
-        Drain the chickpeas, spread on a clean towel, and gently rub to remove skins. Discard remaining peels by hand.
-        
-        Blend chickpeas with tahini, salt, and garlic (if using) until thick. Add 2 ice cubes (or part of the cold water) and continue blending until smoother. Add lemon juice and another ice cube, blending until silky and creamy. Taste and adjust salt. Transfer hummus to a serving plate.
-        
-        For the topping: Heat ghee in a skillet over medium-high heat. Add beef cubes and sear 2 minutes without moving. Flip, add pine nuts, and cook 1–2 minutes until beef is browned and pine nuts lightly toasted.
-        
-        Stir in pomegranate molasses and sprinkle with sumac, mixing to glaze the meat. Adjust salt as needed.
-        
-        Spoon the beef and pine nut topping over the hummus. Serve warm with pita bread.
-    `
-},
-
-    {
-        title: "Chicken Shawarma",
-        ingredients: [
-            "900 g chicken thighs",
-            "30 ml olive oil",
-            "60 ml white vinegar",
-            "Juice of 1 lemon",
-            "30 g tomato paste",
-            "8 g garlic powder",
-            "4 g turmeric",
-            "4 g cumin",
-            "4 g ground coriander",
-            "4 g allspice",
-            "8 g smoked paprika",
-            "4 g onion powder",
-            "4 g ground cardamom",
-            "2 g ground cloves",
-            "2 g cayenne pepper",
-            "2 g MSG (optional)",
-            "12 g sugar",
-            "6 g salt",
-            "Pita bread, warmed",
-            "Sliced pickles",
-            "Garlic sauce (toum)",
-            "Harissa paste"
-        ],
-        instructions: `
-            Mix all the spices in a bowl to create the shawarma spice blend.
-
-            In a larger bowl, combine olive oil, vinegar, lemon juice, and tomato paste. Add the spice blend and mix well to form a marinade. Add chicken strips and toss to coat evenly. Cover and refrigerate overnight or until ready to cook.
-
-            Heat a cast iron skillet over high heat until smoking. Cook the marinated chicken in small batches, avoiding crowding, until a dark, charred crust forms. Transfer cooked chicken to a plate and repeat until all the chicken is cooked.
-
-            Line a small heatproof bowl with aluminum foil and pour in 30 ml of olive oil. Arrange the cooked chicken around the bowl in the skillet.
-
-            Heat a piece of charcoal until red-hot and carefully place it in the oil. Immediately cover the skillet with a tight-fitting lid and let the chicken smoke for 8–10 minutes. Discard the charcoal and oil after smoking.
-
-            Spread garlic sauce (toum) over half of a warmed pita bread, and add a layer of harissa for spice. Add pickles and a generous portion of chicken shawarma. Roll the pita tightly and serve immediately.
-        `
-    },
-             {
-        title: "Pollo Tikka Masala",
-        ingredients: [
-            "4 g coriander seeds",
-            "1 g cumin",
-            "7 g garam masala",
-            "3 g turmeric",
-            "7 garlic cloves",
-            "5 cm piece of ginger, peeled",
-            "1–2 Fresno chilies (adjust for spiciness)",
-            "60 ml water",
-            "30 ml oil",
-            "225 g plain yogurt",
-            "900 g boneless chicken thighs or breasts",
-            "26 g tikka paste (prepared earlier)",
-            "7 g kosher salt",
-            "800 g peeled tomatoes, blended and strained",
-            "56 g unsalted butter",
-            "1 large onion, finely chopped",
-            "300 ml heavy cream",
-            "7 g paprika",
-            "2 g Kashmiri chili powder"
-        ],
-        instructions: `
-            Toast coriander seeds and cumin in a dry pan over medium heat for 2 minutes, stirring constantly. Remove from heat and let cool. Grind the toasted spices, then blend with garlic, ginger, garam masala, turmeric, Fresno chilies, and water until smooth. Gradually add oil to form a thick paste.
-
-            Cut the chicken into bite-sized pieces and marinate with yogurt, 2 tablespoons of tikka paste, and kosher salt. Cover and refrigerate for at least 20 minutes or overnight.
-
-            Blend the peeled tomatoes into a smooth puree and strain to remove excess water and seeds. Set aside.
-
-            Heat oil in a large pan over medium-high heat. Sear the marinated chicken for 3–4 minutes per side until browned. Remove and set aside.
-
-            In the same pan, melt butter over medium heat. Sauté the onions for 5–7 minutes until translucent. Add the remaining tikka paste, paprika, and Kashmiri chili powder. Cook for 2–3 minutes until fragrant.
-
-            Stir in the strained tomato puree and simmer for 10 minutes until thickened. Add heavy cream and cook for another 10–15 minutes until creamy.
-
-            Return the seared chicken to the sauce and simmer for 10–15 minutes until fully cooked. Adjust seasoning as needed. Serve hot with basmati rice or naan bread, garnished with fresh coriander leaves.
-        `
-    },
-            
-    {
-    title: "Biryani di Pollo (Chicken Biryani)",
-    ingredients: [
-        "700 g chicken pieces, bone-in",
-        "120 g full-fat Greek yogurt",
-        "1 tablespoon ginger-garlic paste",
-        "1 teaspoon turmeric",
-        "1 teaspoon chili powder",
-        "1 teaspoon salt",
-        "2 tablespoons ghee",
-        "1 bay leaf",
-        "2-3 green cardamom pods",
-        "1 black cardamom pod",
-        "3-4 cloves",
-        "1 small piece mace or pinch nutmeg",
-        "1 piece cinnamon stick (2.5 cm)",
-        "1 cup chopped red onions",
-        "1 cup diced tomatoes",
-        "½ teaspoon cumin powder",
-        "250 ml chicken broth",
-        "2 tablespoons crispy fried onions",
-        "2 cups aged basmati rice",
-        "Water for boiling",
-        "1 tablespoon ghee (for boiling rice)",
-        "1 teaspoon cumin seeds",
-        "1 bay leaf (for rice)",
-        "1 tablespoon butter",
-        "120 ml fresh cream",
-        "Pinch saffron",
-        "2 large red onions, thinly sliced and fried golden",
-        "2-3 fresh green chilies, halved",
-        "1 small piece fresh ginger, julienned",
-        "¼ cup chopped fresh coriander",
-        "¼ cup chopped fresh mint"
-    ],
-    instructions: `
-        In a bowl, mix the chicken pieces with yogurt, ginger-garlic paste, turmeric, chili powder, and salt. Massage thoroughly and let marinate for at least 30 minutes, ideally 2 hours in the refrigerator.
-
-        Heat generous oil or ghee in a pan and fry thinly sliced onions until crisp and golden. Remove and set aside.
-
-        In a large pot, heat 2 tablespoons of ghee. Add bay leaf, green and black cardamom, cloves, mace (or nutmeg), and cinnamon. Cook for 30 seconds until aromatic.
-
-        Add chopped onions and sauté until golden. Stir in diced tomatoes and cook until soft. Add chili powder, coriander powder, cumin powder, and mix well. Cook for another minute.
-
-        Add marinated chicken to the pot. Cook on medium heat, gradually adding chicken broth, for 15–20 minutes until chicken is cooked and sauce thickens. Stir in 2 tablespoons crispy onions.
-
-        In a separate pot, boil plenty of salted water with 1 tablespoon ghee, cumin seeds, and bay leaf. Add rice and boil until 70–80% cooked (grains still slightly firm). Drain immediately.
-
-        In a small saucepan, warm butter and cream with saffron without boiling.
-
-        In a heavy-bottom pot, spread a little sauce at the bottom. Layer rice, chicken with sauce, fried onions, green chilies, ginger julienne, fresh coriander, and mint. Repeat, finishing with rice. Drizzle saffron cream evenly on top.
-
-        Cover tightly with a lid or seal with dough.
-
-        (Oven method) Bake in preheated oven at 175°C (350°F) for 20–25 minutes.
-
-        (Stovetop method) Cook on lowest heat, ideally with a diffuser, for 25 minutes.
-
-        Rest 10 minutes before gently mixing. Serve hot with raita or fresh salad.
-    `
-},
-            {
-    title: "Chicken Korma",
-    ingredients: [
-        "4 medium onions, finely sliced",
-        "1 kg chicken, cut into pieces",
-        "240 g whole yogurt (not beaten)",
-        "10 g Kashmiri red chili powder",
-        "3 g turmeric powder",
-        "2 g ground black pepper",
-        "20 g coriander powder (preferably fresh)",
-        "40 g ginger-garlic paste",
-        "3–4 green chilies, slit",
-        "Salt to taste",
-        "20 g fresh ginger, julienned",
-        "120 ml oil (for frying onions)",
-        "30–40 g ghee",
-        "5 g cumin seeds",
-        "2 black cardamom pods",
-        "2 green cardamom pods",
-        "3 cm cinnamon stick",
-        "2 bay leaves",
-        "3–4 cloves",
-        "5 whole black peppercorns",
-        "40 g cashews",
-        "10 g chironji (charoli) seeds",
-        "20 g grated dry coconut",
-        "5 g garam masala",
-        "A pinch of mace (javitri), ground",
-        "Freshly grated nutmeg",
-        "2–3 ml kewra water"
-    ],
-    instructions: `
-        Slice the onions finely and fry them in 120 ml hot oil until golden and crispy. Drain on paper towels. Grind about 80% into a smooth paste, and keep the rest crumbled by hand.
-        
-        For the royal paste (optional): In a small pan, melt 1 tbsp ghee and toast cashews and chironji seeds. Turn off the heat, add coconut, mix, soak with a little water, and blend into a fine paste.
-        
-        In a bowl, whisk yogurt with chili powder, turmeric, black pepper, and coriander. Add a little water to prevent burning during cooking.
-        
-        In a heavy-bottomed pot, heat the fried onion oil with ghee. Add all whole spices and sauté for 30 seconds. Add chicken pieces and lightly brown them.
-        
-        Stir in the yogurt-spice mix, ginger-garlic paste, slit green chilies, salt, and julienned ginger. Cover and cook on low heat for about 20 minutes, stirring every 5 minutes.
-        
-        When chicken is tender, add onion paste, crispy onions, and the royal paste. Mix well until the sauce is thick and grainy.
-        
-        Add garam masala, mace, and nutmeg. Simmer for 1 minute, then turn off the heat.
-        
-        Finish with extra ginger julienne and kewra water. Cover and let rest for 5–10 minutes before serving.
-    `
-},
-
-
-    {
-        title: "Japanese Curry",
-        ingredients: [
-            "300 g yellow onion, thinly sliced",
-            "1 tablespoon olive oil",
-            "A pinch of salt",
-            "300 g beef, cubed",
-            "1 tablespoon butter",
-            "2 garlic cloves",
-            "150 g carrot",
-            "200 g potatoes",
-            "1/2 package Japanese curry roux (about 100 g)",
-            "700–900 ml water"
-        ],
-        instructions: `
-            Heat olive oil in a large pot over medium heat. Add onions with a pinch of salt and cook for 20–25 minutes, stirring occasionally, until caramelized.
-
-            Push the onions to one side of the pot and add the beef. Sear on all sides until browned. Add butter and minced garlic, cooking for 1–2 minutes until fragrant.
-
-            Stir in carrots and potatoes, cooking for 5 minutes to slightly soften them. Add water and bring to a boil. Reduce heat and simmer for 15–20 minutes until vegetables are tender.
-
-            Break the curry roux into pieces and stir into the pot. Simmer for another 5–10 minutes, stirring occasionally, until the curry thickens.
-
-            Serve over steamed white rice, garnished with parsley or pickles if desired.
-        `
-    },
-    {
-        title: "Pad Kra Pao (Thai Basil Stir-Fry)",
-        ingredients: [
-            "7 garlic cloves",
-            "3 Thai chilies",
-            "1 shallot",
-            "2 sweet peppers",
-            "2 tablespoons neutral oil",
-            "450 g ground meat (chicken, pork, or beef)",
-            "1.5 cups Thai basil leaves",
-            "Black pepper, to taste",
-            "4 cups cooked hot rice",
-            "4 fried eggs",
-            "1 tablespoon fish sauce",
-            "2 tablespoons soy sauce",
-            "1 teaspoon dark soy sauce",
-            "1 tablespoon oyster sauce",
-            "1.5 teaspoons sugar"
-        ],
-        instructions: `
-            Pound garlic, Thai chilies, and shallot into a coarse paste using a mortar and pestle. Slice sweet peppers thinly for added color.
-
-            In a small bowl, mix fish sauce, soy sauce, dark soy sauce, oyster sauce, and sugar. Set aside.
-
-            Heat oil in a wok over high heat. Add ground meat and spread it in the wok. Let it sear for 2 minutes before stirring. Cook for another 3 minutes until most liquid evaporates.
-
-            Add the garlic-chili paste and stir-fry for 1–2 minutes. Add the prepared sauce mixture, stirring well. Taste and adjust seasoning with additional fish sauce if necessary.
-
-            Turn off the heat and fold in Thai basil leaves, sweet peppers, and black pepper. Stir until the basil is wilted.
-
-            In a separate pan, fry eggs until edges are crispy. Divide cooked rice among plates, top with stir-fried meat, and finish with a fried egg. Serve immediately.
-        `
-    },
-            {
-    title: "Pad Thai",
-    ingredients: [
-        "35 g palm sugar, chopped",
-        "45 ml water",
-        "3–4 tablespoons Thai cooking tamarind",
-        "2 tablespoons fish sauce",
-        "115 g rice noodles",
-        "2 tablespoons dried shrimp, roughly chopped",
-        "3 garlic cloves, minced",
-        "¼ cup shallots, chopped",
-        "85 g pressed tofu, diced",
-        "3 tablespoons sweet preserved daikon, finely chopped",
-        "Chili flakes, to taste",
-        "45 ml vegetable oil",
-        "10 medium shrimp",
-        "2 eggs",
-        "120 g bean sprouts",
-        "70 g Thai chives, cut into 5 cm pieces",
-        "¼ cup roasted peanuts, roughly chopped",
-        "1 lime"
-    ],
-    instructions: `
-        In a small saucepan, melt the palm sugar over medium heat, stirring until it turns slightly darker. Add water, fish sauce, and tamarind, stirring continuously. The caramel may solidify initially but will fully dissolve while preparing other ingredients.
-
-        Soak rice noodles in room-temperature water for about 1 hour until flexible but not completely soft. (If short on time, soak in hot water for 3 minutes, then rinse immediately in cold water.)
-
-        Cut soaked noodles once with scissors to handle more easily. In a bowl, combine tofu, garlic, shallots, sweet daikon, dried shrimp, and chili flakes.
-
-        Heat a wok or large non-stick skillet over high heat, add a drizzle of oil. Cook shrimp until fully cooked, remove from pan, and set aside.
-
-        In the same pan, add more oil if needed, then add the tofu-garlic mixture. Sauté until garlic turns golden and shallots soften.
-
-        Add soaked noodles and prepared Pad Thai sauce, stirring until noodles fully absorb the liquid. If noodles seem dry, add water one tablespoon at a time.
-
-        Push noodles to one side of the pan, drizzle some oil on the empty side, and crack in eggs. Break yolks and cook for about 30 seconds. Cover eggs with noodles, let cook for another 30 seconds, then stir thoroughly to combine.
-
-        Return shrimp to pan, add bean sprouts, Thai chives, and half the peanuts. Stir quickly to combine, then turn off heat.
-
-        Serve immediately with a lime wedge and sprinkle remaining peanuts on top. For an authentic finish, add extra chili flakes, fresh bean sprouts, and Thai chives as desired.
-    `
-},
-    {
-        title: "Hamburger Speciale",
-        ingredients: [
-            "500 g ground beef",
-            "2 egg yolks (1 yolk for every 2 burgers)",
-            "2 tablespoons Worcestershire sauce",
-            "1 tablespoon Tabasco",
-            "Salt and pepper, to taste",
-            "A pinch of MSG (optional)",
-            "2 medium onions, sliced",
-            "20 g butter",
-            "1 tablespoon Calabrian chili oil",
-            "4 hamburger buns",
-            "Sliced cheese (e.g., cheddar or preferred cheese)",
-            "Condiments (ketchup, mayonnaise, mustard, etc.)",
-            "Pickles (optional)",
-            "Tomatoes and lettuce (optional)"
-        ],
-        instructions: `
-            Mix ground beef with egg yolks, Worcestershire sauce, Tabasco, salt, pepper, and MSG (if used). Form burger patties slightly larger than the buns.
-
-            In a pan, melt butter with Calabrian chili oil. Sauté sliced onions over medium-low heat until golden and soft.
-
-            Preheat the oven to 150°C. Slice buns in half and warm them in the oven until lightly crisp.
-
-            In the same pan as the onions, cook burger patties over medium-high heat. Flip once browned, add cheese slices on top, and cover the pan to melt the cheese.
-
-            Spread desired condiments on the buns. Add caramelized onions, pickles, tomatoes, and lettuce. Place the burger patty with melted cheese and top with the other half of the bun. Serve immediately.
-        `
-    },
-            {
-        title: "Chicken Burgers",
-        ingredients: [
-            "2 egg whites",
-            "3 tablespoons dark soy sauce",
-            "3 tablespoons Chinese cooking wine",
-            "3 tablespoons vodka",
-            "1/4 teaspoon baking soda",
-            "3 tablespoons cornstarch (divided)",
-            "700 g chicken breasts",
-            "1 cup all-purpose flour",
-            "1 teaspoon baking powder",
-            "1 teaspoon salt",
-            "Oil for frying",
-            "Burger buns"
-        ],
-        instructions: `
-            Whisk the egg whites until foamy. Add soy sauce, Chinese cooking wine, vodka, baking soda, and 2 tablespoons of cornstarch. Mix until smooth.
-
-            Halve the chicken breasts to create burger-sized portions. Marinate the chicken in the mixture for 30 minutes in the refrigerator.
-
-            In a tray, mix flour, remaining cornstarch, baking powder, and salt. Add 3 tablespoons of reserved marinade and mix to form a crumbly coating.
-
-            Dredge the chicken pieces in the coating, ensuring they're well-covered.
-
-            Heat oil in a pan over medium-high heat. Fry the chicken for 5–7 minutes per side until golden and fully cooked. Place on burger buns with your favorite condiments.
-        `
-    },
-    {
-        title: "Patate Fritte (French Fries)",
-        ingredients: [
-            "Potatoes",
-            "Water",
-            "1–2 tablespoons vinegar",
-            "Oil for frying"
-        ],
-        instructions: `
-            Peel and cut potatoes into sticks about 1 cm wide.
-
-            Boil water and add vinegar. Blanch the potato sticks in boiling water for 7–10 minutes until slightly softened.
-
-            Drain and dry the potatoes thoroughly.
-
-            Heat oil to 150°C. Fry the potatoes in batches for 5–7 minutes until cooked but not browned. Drain and let cool.
-
-            Increase oil temperature to 190°C. Fry the potatoes again for 2–3 minutes until crispy and golden. Drain, season with salt, and serve immediately.
-        `
-    },
-    {
-        title: "Chili con Carne",
-        ingredients: [
-            "2 dried pasilla chilies",
-            "4 dried arbol chilies",
-            "4 dried chipotle chilies",
-            "3 dried guajillo chilies",
-            "3 dried ancho chilies",
-            "1 whole beef roast, cubed",
-            "Vegetable oil",
-            "1 white onion, coarsely chopped",
-            "6 garlic cloves, smashed",
-            "4 cups chicken broth",
-            "2–3 tablespoons tomato paste",
-            "2–3 tablespoons masa harina",
-            "Cinnamon, to taste",
-            "Ground allspice, to taste",
-            "Ground coriander, to taste",
-            "Dried oregano, to taste",
-            "Juice of 2 limes",
-            "Grated cheese, for garnish"
-        ],
-        instructions: `
-            Remove stems and seeds from dried chilies. Toast chilies in a pan over medium heat for 1–2 minutes until fragrant. Soak in hot water for 20 minutes, then blend with a little chicken broth to make a smooth paste.
-
-            Sear beef cubes in a large pot with oil until browned. Remove and set aside.
-
-            In the same pot, sauté onion and garlic until soft. Add the beef, chili paste, chicken broth, tomato paste, masa harina, and spices. Stir well.
-
-            Bring to a boil, then reduce heat and simmer for 2–3 hours until the meat is tender. Stir occasionally.
-
-            Add lime juice before serving and garnish with grated cheese. Serve with cornbread, tortillas, or rice.
-        `
-    },
-            {
-    title: "Parmigiana di Melanzane",
-    ingredients: [
-        "1.7 kg oval black eggplants",
-        "1 L tomato passata",
-        "500 g fiordilatte (fresh mozzarella)",
-        "150 g Parmigiano Reggiano DOP, grated",
-        "1 small yellow onion",
-        "Extra virgin olive oil (q.b.)",
-        "Black pepper (q.b.)",
-        "20 fresh basil leaves",
-        "Salt (q.b.)",
-        "1 L peanut oil (for frying)"
-    ],
-    instructions: `
-    Wash and slice eggplants into 4–5 mm thick slices. Place in a colander in layers, sprinkling each layer with salt. Cover with a weight and let drain for about 1 hour to remove bitter water.
-
-    Prepare the sauce: finely chop onion and sauté in a pan with olive oil. Add tomato passata, season with salt and pepper, add basil leaves, and cook gently for about 40 minutes, stirring occasionally.
-
-    Rinse and pat dry eggplants. Fry in hot peanut oil (170–180 °C) in small batches until golden. Drain on paper towels.
-
-  Slice fiordilatte and let it drain for a few minutes to reduce excess moisture. in a baking dish, spread a ladle of sauce, then a layer of fried eggplants. Add slices of fiordilatte, grated Parmigiano, and more sauce. Repeat layers until ingredients are finished, ending with sauce, Parmigiano, and basil.
-
- Bake in preheated static oven at 200 °C for 30–35 minutes until the top is golden and bubbling.
-
- Rest 15–20 minutes before serving to allow flavors to set.
-    `
-},
-
-            {
-    title: "Garlic Confit",
-    ingredients: [
-        "5 heads garlic (cloves peeled)",
-        "360 ml extra virgin olive oil",
-        "2 sprigs rosemary",
-        "2 sprigs thyme",
-        "5 whole black peppercorns",
-        "1 tsp salt"
-    ],
-    instructions: `
-        Preheat oven to 165 °C.
-
-       Place peeled garlic cloves in a baking dish with rosemary, thyme, salt, and pepper. Pour olive oil over, ensuring garlic is at least 75% submerged. Add more oil or use a smaller dish if needed.
-
-       Bake uncovered for about 45 minutes until garlic is soft and golden.
-
-       Let cool completely before serving or transferring to a clean container with its aromatic oil for storage.
-    `
-},
-
-
-    {
-        title: "Pomodori Secchi (Sun-Dried Tomatoes)",
-        ingredients: [
-            "Sun-dried tomatoes",
-            "1/2 part vinegar",
-            "1/4 part water",
-            "1/4 part wine",
-            "Olive oil",
-            "Garlic, sliced",
-            "Oregano"
-        ],
-        instructions: `
-            Rinse sun-dried tomatoes under cold water. Boil vinegar, water, and wine together. Add tomatoes and simmer for 15 minutes.
-
-            Drain tomatoes and pat them dry. Layer tomatoes in a jar with olive oil, garlic slices, and oregano. Ensure tomatoes are completely submerged in oil.
-
-            Seal the jar and marinate for several hours before serving. Store in the refrigerator and use within a few days.
-        `
-    },
-    {
-        title: "Creamy DD Salad Dressing",
-        ingredients: [
-            "2 tablespoons plain yogurt",
-            "1 tablespoon mayonnaise",
-            "2 teaspoons lemon juice",
-            "2 teaspoons honey",
-            "2 teaspoons olive oil",
-            "1/4 teaspoon paprika",
-            "1/4 teaspoon thyme",
-            "1/4 teaspoon oregano",
-            "Salt, to taste"
-        ],
-        instructions: `
-            Combine yogurt, mayonnaise, lemon juice, honey, and olive oil in a small bowl. Mix until smooth.
-
-            Add paprika, thyme, oregano, and a pinch of salt. Mix again until well combined. Adjust salt or lemon juice to taste.
-
-            Drizzle over salad and toss to coat evenly.
-        `
-    },
-            {
-    title: "Coleslaw",
-    ingredients: [
-        "½ red cabbage",
-        "½ white cabbage",
-        "2 carrots",
-        "½ red onion",
-        "2–3 scallions",
-        "1 apple",
-        "1 bunch fresh parsley",
-        "Water + lemon juice (to keep apple from browning)",
-        "1 cup mayonnaise",
-        "½ cup sour cream",
-        "1 heaping tbsp Dijon mustard",
-        "A few drops hot sauce (optional)",
-        "1 garlic clove, very finely minced",
-        "Chopped parsley (q.b.)",
-        "Salt and black pepper (q.b.)",
-        "Buttermilk (as needed to adjust consistency)",
-        "Optional: crumbled gorgonzola or other blue cheese"
-    ],
-    instructions: `
-       Thinly slice red cabbage and soak in ice water for a few minutes to reduce color bleed. Drain and set aside. Thinly slice white cabbage as well.
-
-       Slice red onion thinly along the grain. Julienne carrots. Slice scallions very finely.
-
-       Peel apple, slice thinly, then julienne. Soak in water with lemon juice to prevent browning.
-
-     In a bowl, prepare the dressing: mix mayonnaise, sour cream, Dijon mustard, hot sauce (if using), garlic, parsley, salt, and black pepper. Adjust thickness with a little buttermilk.
-
-    Combine cabbage, carrots, onion, apple, and scallions in a large salad bowl. Pour dressing over and mix well. Optionally, add crumbled blue cheese for stronger flavor.
-
-       Cover and chill at least 2–3 hours before serving to let flavors meld.
-    `
-},
-
-    {
-    title: "Crème Caramel",
-    ingredients: [
-        "250 g milk",
-        "250 g cream",
-        "40 g sugar",
-        "2 eggs",
-        "30 g Marsala wine",
-        "2 g vanilla extract",
-        "150 g sugar",
-        "40 g water"
-    ],
-    instructions: `
-        Pour 150 g of sugar and 40 g of water into a saucepan. Heat over medium heat without stirring. When the sugar turns a golden amber color, remove it from the heat immediately to prevent burning.
-
-        While the caramel is cooking, combine the milk, cream, 40 g of sugar, and Marsala in another saucepan. Heat until lukewarm, being careful not to bring it to a boil.
-
-        In a bowl, beat the eggs with the vanilla extract using a fork, being careful not to incorporate air. Slowly add the warm milk and cream mixture to the eggs, stirring gently to achieve a smooth and homogeneous mixture.
-
-        Strain the custard through a fine sieve to eliminate any lumps and achieve a silky texture.
-
-        Pour the hot caramel into small molds and let it cool and solidify. To speed up the process, you can place the molds in a tray filled with ice water.
-
-        Once the caramel has solidified, pour the custard mixture over it. Place the molds in a deep baking tray. Pour hot water into the tray until it reaches halfway up the molds (bain-marie cooking).
-
-        Bake in a preheated oven at 130°C (266°F) for 1 hour.
-
-        Carefully remove the molds from the water bath and let them cool to room temperature. Transfer to the refrigerator for at least 12 hours.
-
-        Run a knife along the edges of the molds, invert them onto a plate, and let the caramel drizzle over the custard. Enjoy!
-    `
-},
-{
-        title: "Pancakes",
-        ingredients: [
-            "1 egg",
-            "1/4 cup sugar",
-            "A pinch of salt",
-            "1/2 cup milk",
-            "1.5 tablespoons oil (preferably not olive oil)",
-            "Vanilla extract, to taste",
-            "1 cup flour"
-        ],
-        instructions: `
-            Beat the egg and sugar in a bowl until well combined. Add a pinch of salt to enhance the flavors.
-
-            Gradually add milk while stirring constantly to prevent lumps. Stir in oil and vanilla extract, mixing until smooth.
-
-            Add flour and mix until the batter is lump-free.
-
-            Heat a pan over medium heat and lightly grease it with butter. Pour a small amount of batter for each pancake. Cook until golden on both sides, flipping once.
-
-            Serve warm with toppings like honey, maple syrup, or fresh fruit. Enjoy!
-        `
-    },
-    {
-        title: "Fluffy Japanese Pancakes",
-        ingredients: [
-            "2 eggs (separated into yolks and whites)",
-            "14 g whole milk",
-            "3 g vanilla extract",
-            "30 g cake flour",
-            "3 g baking powder",
-            "1 g fine salt",
-            "35 g granulated sugar",
-            "Water (for steaming)"
-        ],
-        instructions: `
-            Mix egg yolks with milk and vanilla extract. Sift flour, baking powder, and salt into the mixture and stir until smooth.
-
-            Whip egg whites until foamy, then gradually add sugar and beat until stiff peaks form.
-
-            Gently fold the egg whites into the yolk mixture in three additions to retain air.
-
-            Heat a non-stick pan on low heat, lightly grease it, and spoon 1/4 cup batter for each pancake. Add 1 teaspoon of water to the pan to create steam and cover with a lid.
-
-            Cook for 3–4 minutes, then add more batter on top of each pancake, repeating the process until the batter is used up. Flip and cook until both sides are golden and pancakes are fully cooked.
-
-            Serve with whipped cream, powdered sugar, butter, and maple syrup.
-        `
-    },
-            {
-    title: "Waffle",
-    ingredients: [
-        "300 g flour 00",
-        "45 g granulated sugar",
-        "15 g baking powder",
-        "4 g fine salt",
-        "2 whole eggs",
-        "1 egg yolk",
-        "240 ml whole milk",
-        "120 ml buttermilk",
-        "170 g melted butter",
-        "5 g vanilla extract"
-    ],
-    instructions: `
-        In a medium bowl, combine flour, sugar, baking powder, and salt.
-
-        Add eggs, egg yolk, milk, buttermilk, and vanilla extract. Mix until smooth and homogeneous.
-
-        Gradually pour in melted butter, mixing continuously until the batter is smooth and lump-free.
-
-        Preheat waffle iron and lightly grease with oil or butter.
-
-        Pour batter into waffle iron, filling about ¾ full.
-
-        Cook until waffles are golden and crisp, turning if necessary.
-
-        Serve warm with butter and maple syrup, or with fresh fruit and whipped cream.
-    `
-},
-    {
-        title: "Cinnamon Rolls",
-        ingredients: [
-            "580 g all-purpose flour",
-            "107 g granulated sugar",
-            "6 g fine sea salt",
-            "84 g softened butter",
-            "235 g warm whole milk",
-            "7 g instant yeast",
-            "2 eggs",
-            "1 egg yolk",
-            "225 g brown sugar",
-            "14 g muscovado sugar",
-            "17 g cinnamon",
-            "84 g softened butter (for filling)",
-            "115 g cream cheese",
-            "90 g powdered sugar",
-            "1 vanilla bean",
-            "45 ml whole milk"
-        ],
-        instructions: `
-            Mix flour, sugar, and salt in a bowl. Add softened butter and mix until crumbly.
-
-            In another bowl, combine warm milk and yeast. Add to the dry mixture along with eggs and yolk. Knead until smooth and let rise for 90 minutes.
-
-            For the filling, mix brown sugar, muscovado sugar, and cinnamon. Roll dough into a rectangle, spread butter, and sprinkle with the sugar mixture. Roll tightly and cut into 5 cm pieces.
-
-            Place rolls in a greased pan, cover, and let rise for 30–45 minutes. Bake at 190°C for 15–20 minutes. Cool for 15 minutes.
-
-            For the glaze, beat cream cheese and powdered sugar. Add milk and vanilla bean seeds. Drizzle over rolls and serve.
-        `
-    },
-    {
-        title: "Torta di Mele su Pasta Sfoglia (Apple Tart)",
-        ingredients: [
-            "1 sheet puff pastry",
-            "3–4 apples",
-            "Cinnamon, to taste",
-            "Sugar, to taste",
-            "Lemon juice, to taste"
-        ],
-        instructions: `
-            Peel and slice apples thinly. Lay puff pastry on a baking sheet lined with parchment paper.
-
-            Arrange apple slices neatly on the pastry. Sprinkle with cinnamon and sugar, then drizzle with lemon juice.
-
-            Bake at 180°C for 20–25 minutes or until golden. Serve warm or at room temperature.
-        `
-    },
-    {
-        title: "Simit",
-        ingredients: [
-            "330 g flour",
-            "198 g water + milk (preferably milk for richer flavor)",
-            "6 g salt",
-            "8 g sugar",
-            "5 g dry or fresh yeast",
-            "30 g oil (not olive oil)",
-            "Sesame seeds, as needed"
-        ],
-        instructions: `
-            Dissolve yeast in warm water and milk with sugar. Let it foam for a few minutes. Gradually add flour, salt, and oil, kneading until smooth.
-
-            Let the dough rise for 60–65 minutes. Divide into six portions, roll into long strips, twist two strips together, and form into rings. Let rest for 30 minutes.
-
-            Mix 1 cup water with 1/3 cup sugar. Dip each ring into the mixture, then coat with sesame seeds.
-
-            Bake at 230°C for 7–10 minutes or until golden and crisp.
-        `
-    },
-
-        ];
-    // Populate the index and recipes
-    const indexElement = document.getElementById("recipe-index");
-    const recipesElement = document.getElementById("recipe-list");
-
-    recipes.forEach((recipe, index) => {
-        // Add to index
-        const listItem = document.createElement("li");
-        const link = document.createElement("a");
-        link.href = `#recipe-${index}`;
-        link.textContent = recipe.title;
-        link.dataset.index = index; // Add data attribute for reference
-        link.className = "recipe-link"; // Add a class for styling
-        listItem.appendChild(link);
-        indexElement.appendChild(listItem);
-
-        // Add to recipes
-        const recipeDiv = document.createElement("div");
-        recipeDiv.className = "recipe";
-        recipeDiv.id = `recipe-${index}`;
-
-        const title = document.createElement("h3");
-        title.textContent = recipe.title;
-        recipeDiv.appendChild(title);
-
-        const ingredients = document.createElement("ul");
-        recipe.ingredients.forEach(ingredient => {
-            const item = document.createElement("li");
-            item.textContent = ingredient;
-            ingredients.appendChild(item);
-        });
-        recipeDiv.appendChild(ingredients);
-
-        const instructions = document.createElement("p");
-        instructions.textContent = recipe.instructions.trim();
-        recipeDiv.appendChild(instructions);
-
-        recipesElement.appendChild(recipeDiv);
-    });
-
-    // Filter recipes by name or ingredient
-    function filterRecipes() {
-        const query = document.getElementById('search-bar').value.toLowerCase().replace(/\d+/g, ''); // Remove numbers
-        const recipeLinks = document.querySelectorAll('#recipe-index li');
-        const allRecipes = document.querySelectorAll('.recipe');
-
-        const recommendations = [];
-
-        recipeLinks.forEach((link, index) => {
-            const recipe = recipes[index];
-            const recipeName = recipe.title.toLowerCase();
-            const ingredients = recipe.ingredients.map(ing => ing.toLowerCase());
-
-            // Check if the query matches the recipe name or any ingredient
-            const matches = recipeName.includes(query) || ingredients.some(ing => ing.includes(query));
-
-            // Show or hide the link based on the match
-            link.style.display = matches ? 'block' : 'none';
-
-            // Show or hide the corresponding recipe
-            allRecipes[index].style.display = matches ? 'block' : 'none';
-
-            // Add to recommendations if partially matches
-            if (recipeName.includes(query) || ingredients.some(ing => ing.includes(query))) {
-                recommendations.push(recipe.title);
-            }
-        });
-
-        // Show up to 3 recommendations if matches found
-        const recommendationBox = document.getElementById('recommendation-box');
-        if (recommendations.length > 0 && query.trim() !== "") {
-            const limitedRecommendations = recommendations.slice(0, 5); // Limit to 3 recommendations
-            recommendationBox.innerHTML = `<strong>Recommendations:</strong><ul>${limitedRecommendations
-                .map(rec => `<li style="margin-bottom: 10px;">${rec}</li>`)
-                .join('')}</ul>`;
-            recommendationBox.style.display = 'block';
-        } else {
-            recommendationBox.style.display = 'none';
-        }
+      }
+    ];
+
+    // --- Helpers ---
+    let selectedCategory = 'All';
+
+    function collectCategories(list){
+      const set = new Set(['All']);
+      list.forEach(r=>{
+        (r.categories||['Uncategorized']).forEach(c=> set.add(c));
+      });
+      return Array.from(set);
     }
 
-    // Handle recipe click to show only the selected recipe
-    indexElement.addEventListener('click', (event) => {
-        if (event.target.tagName === 'A') {
-            event.preventDefault(); // Prevent default link behavior
+    function renderCategories(list){
+      const nav = document.getElementById('categories');
+      nav.innerHTML = '';
+      const cats = collectCategories(list);
+      cats.forEach(c=>{
+        const b = document.createElement('button');
+        b.className = 'pill';
+        b.type = 'button';
+        b.textContent = c;
+        b.setAttribute('aria-pressed', String(c===selectedCategory));
+        b.addEventListener('click', ()=>{
+          selectedCategory = c;
+          update();
+        });
+        nav.appendChild(b);
+      });
+    }
+    const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+    const escapeHtml = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 
-            const selectedIndex = event.target.dataset.index;
-            const allRecipes = document.querySelectorAll('.recipe');
-            const allLinks = document.querySelectorAll('.recipe-link');
-            const selectedLink = event.target;
+    function highlight(text, term){
+      if(!term) return escapeHtml(text);
+      const safe = term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+      return escapeHtml(text).replace(new RegExp(`(${safe})`,`ig`), '<mark>$1</mark>');
+    }
 
-            // Toggle color and visibility
-            if (selectedLink.classList.contains('active')) {
-                // If already active, show all recipes and reset button colors
-                allRecipes.forEach(recipe => recipe.style.display = 'block');
-                allLinks.forEach(link => link.classList.remove('active'));
-            } else {
-                // Otherwise, show only the selected recipe
-                allRecipes.forEach((recipe, index) => {
-                    recipe.style.display = index == selectedIndex ? 'block' : 'none';
-                });
+    function debounced(fn, wait=120){
+      let t;return (...args)=>{clearTimeout(t);t=setTimeout(()=>fn(...args),wait)}
+    }
 
-                // Update button colors
-                allLinks.forEach(link => link.classList.remove('active'));
-                selectedLink.classList.add('active');
-            }
-        }
-    });
+    // --- Render index ---
+    function renderIndex(list){
+      const ul = document.getElementById('recipe-index');
+      ul.innerHTML = '';
+      list.forEach(r=>{
+        const id = slug(r.title);
+        const li = document.createElement('li');
+        li.innerHTML = `<a href="#${id}">${escapeHtml(r.title)}</a>`;
+        ul.appendChild(li);
+      });
+      document.getElementById('count').textContent = `${list.length} recipe${list.length===1?'':'s'}`;
+    }
 
-    // Reset view when the search bar is cleared
-    document.getElementById('search-bar').addEventListener('input', filterRecipes);
-</script>
+    // --- Render recipes ---
+    function renderRecipes(list, term=''){
+      const wrap = document.getElementById('recipe-list');
+      wrap.innerHTML = '';
+      list.forEach(r=>{
+        const id = slug(r.title);
+        const art = document.createElement('article');
+        art.className = 'recipe';
+        art.id = id;
+        const ing = r.ingredients.map(i=>`<li>${highlight(i, term)}</li>`).join('');
+        art.innerHTML = `
+          <h3>${highlight(r.title, term)}</h3>
+          <div class="meta">${r.ingredients.length} ingredients</div>
+          <h4>Ingredients</h4>
+          <ul>${ing}</ul>
+          <h4>Instructions</h4>
+          <p>${highlight(r.instructions.trim(), term).replace(/\n\n/g,'</p><p>')}</p>
+        `;
+        wrap.appendChild(art);
+      });
+    }
 
-<div id="recommendation-box" style="margin-top: 20px; padding: 10px; background-color: #f1f1f1; border: 1px solid #ccc; display: none;"></div>
+    // --- Search + filter ---
+    function filter(list, q){
+      const matchSearch = (r)=>{
+        if(!q) return true;
+        const t = q.toLowerCase();
+        return r.title.toLowerCase().includes(t) ||
+          (r.categories||[]).some(cat=>cat.toLowerCase().includes(t)) ||
+          r.ingredients.some(i=>i.toLowerCase().includes(t)) ||
+          r.instructions.toLowerCase().includes(t);
+      };
+      const matchCat = (r)=> selectedCategory==='All' ? true : (r.categories||['Uncategorized']).includes(selectedCategory);
+      return list.filter(r=> matchSearch(r) && matchCat(r));
+    }
+
+    const onSearch = debounced(()=>{ update(); }, 150);
+      const filtered = filter(recipes, q);
+      renderIndex(filtered);
+      renderRecipes(filtered, q);
+      if(location.hash){ // keep focus on selection after search
+        const target = document.querySelector(location.hash);
+        if(target) target.scrollIntoView({behavior:'smooth', block:'start'});
+      }
+    }, 150);
+
+    // --- Hash navigation ---
+    function handleHash(){
+      const id = location.hash.replace('#','');
+      if(!id) return;
+      const target = document.getElementById(id);
+      if(target){ target.scrollIntoView({behavior:'smooth', block:'start'}); target.tabIndex = -1; target.focus({preventScroll:true}); }
+    }
+
+    // --- Boot & update ---
+    function update(){
+      const q = document.getElementById('search-bar').value.trim();
+      const filtered = filter(recipes, q);
+      renderCategories(recipes); // keep buttons; reset pressed state
+      // re-mark selected state
+      [...document.querySelectorAll('#categories .pill')].forEach(b=> b.setAttribute('aria-pressed', String(b.textContent===selectedCategory)));
+      renderIndex(filtered);
+      renderRecipes(filtered, q);
+      if(location.hash){
+        const target = document.querySelector(location.hash);
+        if(target) target.scrollIntoView({behavior:'smooth', block:'start'});
+      }
+    }
+
+    (function init(){
+      document.getElementById('year').textContent = new Date().getFullYear();
+      renderCategories(recipes);
+      renderIndex(recipes);
+      renderRecipes(recipes);
+      document.getElementById('search-bar').addEventListener('input', onSearch);
+      window.addEventListener('hashchange', handleHash);
+      handleHash();
+    })();
+  </script>
+
+  <!-- Optional schema to help SEO: simple ItemList of recipe anchors -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "url": "#beurre-cafe-de-paris" },
+      { "@type": "ListItem", "position": 2, "url": "#filetto-al-pepe-verde" },
+      { "@type": "ListItem", "position": 3, "url": "#poulet-cremeux-a-la-dijon" },
+      { "@type": "ListItem", "position": 4, "url": "#pasta" },
+      { "@type": "ListItem", "position": 5, "url": "#gnocchi" },
+      { "@type": "ListItem", "position": 6, "url": "#pizza" }
+    ]
+  }
+  </script>
 </body>
 </html>
