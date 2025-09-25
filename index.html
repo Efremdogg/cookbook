@@ -7,36 +7,55 @@
   <title>Efrem Raimondo's Cookbook</title>
   <meta name="description" content="No‑nonsense recipes by Efrem Raimondo. Simple search, clean index, categories, single‑recipe view, and fast navigation." />
   <meta name="theme-color" content="#444444" />
+  <meta name="color-scheme" content="light dark" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%8D%B4%3C/text%3E%3C/svg%3E" />
   <style>
     :root{
-      --bg:#e6e6e6; /* softer than pure #d3d3d3 */
+      --bg:#e9e9e9;
       --card:#ffffff;
       --ink:#222;
       --muted:#666;
-      --brand:#ff13f0; /* your hover color */
+      --brand:#ff13f0;
       --shadow:0 3px 6px rgba(0,0,0,.1);
       --shadow-lg:0 6px 16px rgba(0,0,0,.16);
       --radius:12px;
-      --ok:#1a7f37; /* tests */
+      --ok:#1a7f37;
       --bad:#c4302b;
     }
+    @media (prefers-color-scheme: dark){
+      :root{--bg:#141414;--card:#1e1e1e;--ink:#e9e9e9;--muted:#b7b7b7;--shadow:0 0 0 rgba(0,0,0,0);--shadow-lg:0 0 0 rgba(0,0,0,0)}
+      header,footer{background:#1b1b1b}
+      #search-bar,.pill,.btn{background:#1b1b1b;color:var(--ink);border-color:#333}
+    }
+
     *{box-sizing:border-box}
+    html:focus-within{scroll-behavior:smooth}
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.6;margin:0;background:var(--bg);color:var(--ink)}
     header{background:#444;color:#fff;padding:28px 16px;text-align:center}
-    header h1{margin:.2rem 0 0;font-size:1.8rem}
+    header h1{margin:.2rem 0 0;font-size:clamp(1.4rem,2.5vw,1.9rem)}
     header p{margin:.3rem 0 0;color:#e8e8e8}
 
     .container{max-width:1100px;margin:0 auto;padding:20px}
 
-    /* Search row */
-    .tools{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    .skip{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
+    .skip:focus{position:static;width:auto;height:auto;margin:8px;display:inline-block;background:#fff;color:#000;padding:8px 12px;border-radius:10px}
+
+    /* Tools row */
+    .tools{display:grid;grid-template-columns:1fr;gap:12px;align-items:center}
+    #search-wrap{display:flex;gap:12px;align-items:center}
     #search-bar{flex:1 1 360px;padding:12px 14px;border-radius:10px;border:1px solid #ccc;font-size:16px;outline:none}
     #search-bar:focus{border-color:#999;box-shadow:0 0 0 3px rgba(0,0,0,.06)}
     #count{color:var(--muted);font-size:.95rem}
-    .single-bar{display:none;align-items:center;gap:10px;background:#fff;border:1px solid #ddd;border-radius:10px;padding:8px 12px;box-shadow:var(--shadow)}
+    .single-bar{display:none;align-items:center;gap:10px;background:var(--card);border:1px solid #ddd;border-radius:10px;padding:8px 12px;box-shadow:var(--shadow)}
     .single-bar.show{display:flex}
-    .btn{border:1px solid #ccc;border-radius:10px;padding:8px 12px;background:#fff;cursor:pointer}
+    .btn{border:1px solid #ccc;border-radius:10px;padding:8px 12px;background:var(--card);cursor:pointer}
     .btn:hover{box-shadow:var(--shadow)}
+
+    /* Category pills */
+    .pill-group{display:flex;gap:8px;flex-wrap:wrap}
+    .pill{padding:8px 12px;border-radius:999px;background:var(--card);border:1px solid #ccc;box-shadow:var(--shadow);cursor:pointer;font-size:.95rem}
+    .pill[aria-pressed="true"]{background:var(--brand);color:#fff;border-color:transparent}
+    .pill:focus{outline:3px solid rgba(255,19,240,.45);outline-offset:2px}
 
     /* Index grid */
     #recipe-index{display:grid;grid-template-columns:1fr;gap:14px;list-style:none;padding:0;margin:18px 0}
@@ -46,47 +65,53 @@
 
     #recipe-index li{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 16px;transition:transform .15s ease, box-shadow .15s ease}
     #recipe-index li:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
-    #recipe-index a{display:block;text-decoration:none;color:#333;font-weight:600}
+    #recipe-index a{display:block;text-decoration:none;color:inherit;font-weight:600}
     #recipe-index a:hover{color:var(--brand);text-decoration:underline}
 
     .recipe{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin:18px 0}
     .recipe h3{margin-top:0}
     .recipe .meta{color:var(--muted);font-size:.9rem;margin-top:-6px}
     .recipe mark{padding:0 .15em;border-radius:4px}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;margin:.5rem 0}
 
     footer{text-align:center;padding:18px;background:#444;color:#fff;margin-top:32px}
 
-    /* a11y focus */
     a:focus,button:focus,input:focus{outline:3px solid rgba(255,19,240,.45);outline-offset:2px}
-
-    /* util */
     .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 
-    /* Category pills */
-    .pill-group{display:flex;gap:8px;flex-wrap:wrap}
-    .pill{padding:8px 12px;border-radius:999px;background:#fff;border:1px solid #ccc;box-shadow:var(--shadow);cursor:pointer;font-size:.95rem}
-    .pill[aria-pressed="true"]{background:var(--brand);color:#fff;border-color:transparent}
-    .pill:focus{outline:3px solid rgba(255,19,240,.45);outline-offset:2px}
+    /* Print */
+    @media print{
+      header, .tools, #index{display:none}
+      body{background:#fff;color:#000}
+      .recipe{box-shadow:none;border:0;margin:0;padding:0 0 16px 0;page-break-inside:avoid}
+    }
 
-    /* Tests badge */
-    #test-output{margin-top:8px;font-size:.9rem}
-    #test-output .pass{color:var(--ok);font-weight:600}
-    #test-output .fail{color:var(--bad);font-weight:600}
+    /* Simple modal */
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:grid;place-items:center;padding:16px;z-index:1000}
+    .modal-card{background:var(--card);color:var(--ink);border-radius:var(--radius);box-shadow:var(--shadow-lg);padding:16px;max-width:720px;width:100%}
+    .modal-card label{display:block;margin:.6rem 0}
+    .modal-card input,.modal-card textarea{width:100%;padding:10px;border:1px solid #ccc;border-radius:10px;background:var(--card);color:var(--ink)}
+    .modal-card textarea{font-family:inherit}
   </style>
 </head>
 <body>
-  <header>
+  <a href="#main" class="skip">Skip to content</a>
+  <header role="banner">
     <h1>Efrem Raimondo's Cookbook</h1>
     <p>No‑nonsense instructions to save your cooking (and your sanity).</p>
   </header>
 
-  <main class="container">
+  <main id="main" class="container">
     <div class="tools" role="search">
-      <label for="search-bar" class="sr-only">Search recipes</label>
-      <input id="search-bar" type="search" placeholder="Search recipes, ingredients…" autocomplete="off" aria-describedby="count" />
-      <div id="count" aria-live="polite"></div>
+      <div id="search-wrap">
+        <label for="search-bar" class="sr-only">Search recipes</label>
+        <input id="search-bar" type="search" placeholder="Search recipes, ingredients… (press / to focus)" autocomplete="off" aria-describedby="count help" />
+        <div id="count" aria-live="polite"></div>
+      </div>
+      <p id="help" class="sr-only">Use Left/Right to switch category, Enter to open a recipe, Esc to exit single view.</p>
       <nav aria-label="Categories" class="pill-group" id="categories"></nav>
       <div id="test-output" aria-live="polite"></div>
+      <button id="add-recipe" class="btn" type="button" hidden aria-label="Add recipe (private)" title="Add a new recipe">＋</button>
       <div id="single-bar" class="single-bar" aria-live="polite">
         <span id="single-label"></span>
         <button id="show-all" class="btn" type="button">Show all</button>
@@ -95,22 +120,39 @@
 
     <section id="index" aria-labelledby="index-title">
       <h2 id="index-title">Index</h2>
-      <ul id="recipe-index"></ul>
+      <ul id="recipe-index" role="list"></ul>
     </section>
 
     <section id="recipes" aria-labelledby="recipes-title">
       <h2 id="recipes-title">Recipes</h2>
       <div id="recipe-list"></div>
     </section>
+
+    <!-- Add-recipe modal (private) -->
+    <div id="add-modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="add-title" style="display:none">
+      <div class="modal-card" role="document">
+        <h3 id="add-title">Add a new recipe</h3>
+        <form id="add-form">
+          <label>Title<br><input id="add-title-input" type="text" required placeholder="e.g., Carbonara" /></label>
+          <label>Categories (comma separated)<br><input id="add-cats" type="text" placeholder="Pasta, Sauce" /></label>
+          <label>Ingredients (one per line)<br><textarea id="add-ings" rows="6" placeholder="200 g spaghetti&#10;2 eggs&#10;..." required></textarea></label>
+          <label>Instructions<br><textarea id="add-steps" rows="8" placeholder="Write steps..." required></textarea></label>
+          <div class="actions">
+            <button type="submit" class="btn">Save</button>
+            <button type="button" class="btn" id="add-cancel">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </main>
 
-  <footer>
+  <footer role="contentinfo">
     <p>&copy; <span id="year"></span> Efrem Raimondo's Cookbook</p>
   </footer>
 
   <script>
-    // --- Data (original content + categories) ---
-    const recipes = [
+    // --- Data (your original content + categories) ---
+    const baseRecipes = [
       { title: "Beurre Café de Paris", categories: ["Sauce"], ingredients: [
           "3 scallions, thinly sliced","1 clove of garlic","2 teaspoons of mustard","2 anchovies","6 teaspoons of Worcestershire sauce","Parsley, chopped","Zest of 1 lemon","5 teaspoons of lemon juice","1/2 stick of butter"],
         instructions: `
@@ -199,8 +241,16 @@
         `}
     ];
 
+    // Merge-in user recipes saved locally (private additions)
+    let recipes = [];
+    function loadUserRecipes(){
+      try{ const raw = localStorage.getItem('userRecipes'); return raw ? JSON.parse(raw) : []; }catch(_){ return []; }
+    }
+    function saveUserRecipes(arr){ try{ localStorage.setItem('userRecipes', JSON.stringify(arr)); }catch(_){} }
+    function recomputeRecipes(){ recipes = [...baseRecipes, ...loadUserRecipes()]; }
+
     // --- State & helpers ---
-    let selectedCategory = 'All';
+    let selectedCategory = localStorage.getItem('cat') || 'All';
     let selectedRecipeId = null; // when set, show only that recipe
 
     const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
@@ -226,13 +276,14 @@
       const nav = document.getElementById('categories');
       nav.innerHTML = '';
       const cats = collectCategories(list);
-      cats.forEach(c=>{
+      cats.forEach((c,idx)=>{
         const b = document.createElement('button');
         b.className = 'pill';
         b.type = 'button';
         b.textContent = c;
         b.setAttribute('aria-pressed', String(c===selectedCategory));
-        b.addEventListener('click', ()=>{ selectedCategory = c; selectedRecipeId=null; update(); });
+        b.setAttribute('data-index', idx);
+        b.addEventListener('click', ()=>{ selectedCategory = c; localStorage.setItem('cat', c); selectedRecipeId=null; update(); });
         nav.appendChild(b);
       });
     }
@@ -255,6 +306,17 @@
       });
     }
 
+    function recipeToSchema(r){
+      return {
+        "@context":"https://schema.org",
+        "@type":"Recipe",
+        name: r.title,
+        recipeCategory: (r.categories||[]).join(', '),
+        recipeIngredient: r.ingredients,
+        recipeInstructions: r.instructions.trim().split(/\n\n+/).map(step=>({"@type":"HowToStep", text: step.trim()}))
+      };
+    }
+
     function renderRecipes(list, term=''){
       const wrap = document.getElementById('recipe-list');
       wrap.innerHTML = '';
@@ -265,25 +327,47 @@
         const art = document.createElement('article');
         art.className = 'recipe';
         art.id = id;
+        art.tabIndex = -1;
         const ing = r.ingredients.map(i=>`<li>${highlight(i, term)}</li>`).join('');
         const cats = (r.categories||['Uncategorized']).join(', ');
         art.innerHTML = `
           <h3><button class="btn" data-open="${id}" style="border:none;background:transparent;padding:0;font:inherit;color:inherit;text-align:left">${highlight(r.title, term)}</button></h3>
           <div class="meta">${r.ingredients.length} ingredients • ${cats}</div>
+          <div class="actions">
+            <button class="btn" data-copy="${id}-ingredients" aria-label="Copy ingredients for ${escapeHtml(r.title)}">Copy ingredients</button>
+            <button class="btn" data-copy="${id}-instructions" aria-label="Copy instructions for ${escapeHtml(r.title)}">Copy steps</button>
+                      </div>
           <h4>Ingredients</h4>
-          <ul>${ing}</ul>
+          <ul id="${id}-ingredients">${ing}</ul>
           <h4>Instructions</h4>
-          <p>${highlight(r.instructions.trim(), term).replace(/\n\n/g,'</p><p>')}</p>
+          <div id="${id}-instructions"><p>${highlight(r.instructions.trim(), term).replace(/\n\n/g,'</p><p>')}</p></div>
         `;
         wrap.appendChild(art);
+
+        // Schema per recipe (SEO)
+        const s = document.createElement('script');
+        s.type = 'application/ld+json';
+        s.textContent = JSON.stringify(recipeToSchema(r));
+        art.appendChild(s);
       });
       // Title click also enables single view
       wrap.querySelectorAll('[data-open]').forEach(b=>{
         b.addEventListener('click', ()=>{
           selectedRecipeId = b.getAttribute('data-open');
           update();
+          const target = document.getElementById(selectedRecipeId);
+          if(target) target.focus({preventScroll:true});
         });
       });
+      // Copy buttons
+      wrap.querySelectorAll('[data-copy]').forEach(b=>{
+        b.addEventListener('click', async ()=>{
+          const sel = document.getElementById(b.getAttribute('data-copy'));
+          const txt = sel ? sel.innerText.replace(/\n+/g,'\n').trim() : '';
+          try{ await navigator.clipboard.writeText(txt); b.textContent = 'Copied!'; setTimeout(()=>{ const isIng = b.getAttribute('data-copy').includes('ingredients'); b.textContent = 'Copy ' + (isIng?'ingredients':'steps'); },1200);}catch(e){ alert('Could not copy.'); }
+        });
+      });
+
       // Single bar state
       const bar = document.getElementById('single-bar');
       const label = document.getElementById('single-label');
@@ -310,7 +394,7 @@
       return list.filter(r=> matchSearch(r) && matchCat(r));
     }
 
-    const onSearch = debounced(()=>{ selectedRecipeId=null; update(); }, 150);
+    const onSearch = debounced(()=>{ selectedRecipeId=null; localStorage.setItem('q', document.getElementById('search-bar').value.trim()); update(); }, 150);
 
     function handleHash(){
       const id = location.hash.replace('#','');
@@ -318,7 +402,7 @@
       update(true); // keep current hash
       if(id){
         const target = document.getElementById(id);
-        if(target){ target.scrollIntoView({behavior:'smooth', block:'start'}); target.tabIndex = -1; target.focus({preventScroll:true}); }
+        if(target){ target.scrollIntoView({behavior:'smooth', block:'start'}); target.focus({preventScroll:true}); }
       }
     }
 
@@ -334,19 +418,7 @@
       }
     }
 
-    (function init(){
-      document.getElementById('year').textContent = new Date().getFullYear();
-      renderCategories(recipes);
-      renderIndex(recipes);
-      renderRecipes(recipes);
-      document.getElementById('search-bar').addEventListener('input', onSearch);
-      document.getElementById('show-all').addEventListener('click', ()=>{ selectedRecipeId=null; update(); });
-      window.addEventListener('hashchange', handleHash);
-      handleHash();
-      runTests();
-    })();
-
-    // --- Minimal tests ---
+    // --- Minimal tests (original + more) ---
     function runTests(){
       const out = [];
       const ok = (cond, name)=>{ out.push({name, cond}); };
@@ -357,6 +429,7 @@
         ok(res.includes('<mark>'), 'highlight() marks a term with regex specials');
       }catch(e){ ok(false, 'highlight() throws with regex specials'); }
 
+      // Existing tests
       const prev = selectedCategory; selectedCategory = 'Pasta';
       ok(filter(recipes, '').length === 2, 'filter() by category only (Pasta) returns 2');
       selectedCategory = prev;
@@ -371,14 +444,99 @@
       ok(before > 1 && after === 1, 'single-view shows only one article');
       selectedRecipeId = null; update();
 
+      ok(typeof navigator.clipboard !== 'undefined', 'Clipboard API exists (may fail in some contexts)');
+
+      // New tests
+      ok(escapeHtml('<>&"\'').includes('&lt;') && escapeHtml('<>&"\'').includes('&quot;'), 'escapeHtml() escapes HTML chars');
+      const schemaScripts = document.querySelectorAll('.recipe script[type="application/ld+json"]').length;
+      const recipeArticles = document.querySelectorAll('.recipe').length;
+      ok(schemaScripts === recipeArticles, 'Each recipe renders a JSON-LD script');
+      ok('a\nb'.split('\n').length === 2, 'JS newline split works');
+      ok(document.getElementById('add-form') && document.getElementById('add-ings'), 'Add modal form exists');
+
       const passed = out.filter(t=>t.cond).length;
       const failed = out.length - passed;
       const el = document.getElementById('test-output');
-      el.innerHTML = failed===0
-        ? `<span class="pass">✓ ${passed} tests passed</span>`
-        : `<span class="fail">✗ ${failed} tests failed (${passed} passed)</span>`;
-      console.table(out.map(t=>({test:t.name, result:t.cond?'PASS':'FAIL'})));
-    }
+      el.innerHTML = failed>0
+        ? `<span class="fail">✗ ${failed} tests failed (${passed} passed)</span>`
+        : '';
+      try{ console.table(out.map(t=>({test:t.name, result:t.cond?'PASS':'FAIL'}))); }catch(_){}}
+
+    (function init(){
+      document.getElementById('year').textContent = new Date().getFullYear();
+
+      // Private mode detection: localhost/.local OR ?admin OR stored flag
+      const url = new URL(location.href);
+      if(url.searchParams.has('admin')){ localStorage.setItem('cookbook_admin','1'); url.searchParams.delete('admin'); history.replaceState(null,'', url.pathname + (url.searchParams.toString()?('?'+url.searchParams.toString()):'')); }
+      const isPrivate = ['localhost','127.0.0.1','::1',''].includes(location.hostname) || location.hostname.endsWith('.local') || localStorage.getItem('cookbook_admin')==='1';
+
+      // Build recipes with user additions
+      recomputeRecipes();
+
+      renderCategories(recipes);
+      renderIndex(recipes);
+      renderRecipes(recipes);
+
+      const search = document.getElementById('search-bar');
+      const savedQ = localStorage.getItem('q');
+      if(savedQ){ search.value = savedQ; }
+      search.addEventListener('input', onSearch);
+
+      document.getElementById('show-all').addEventListener('click', ()=>{ selectedRecipeId=null; update(); });
+      window.addEventListener('hashchange', handleHash);
+
+      // Shortcuts
+      window.addEventListener('keydown', (e)=>{
+        if(e.key === '/' && document.activeElement !== search){ e.preventDefault(); search.focus(); return; }
+        if(e.key === 'Escape' && selectedRecipeId){ selectedRecipeId = null; update(); }
+        if(['ArrowLeft','ArrowRight'].includes(e.key)){
+          const pills = [...document.querySelectorAll('#categories .pill')];
+          const idx = pills.findIndex(p=>p.textContent===selectedCategory);
+          if(idx !== -1){
+            const next = e.key==='ArrowRight' ? Math.min(idx+1, pills.length-1) : Math.max(idx-1, 0);
+            pills[next].click();
+          }
+        }
+        if(e.key === 'Enter' && !selectedRecipeId){
+          const first = document.querySelector('#recipe-index a');
+          if(first){ first.click(); }
+        }
+      });
+
+      // Private add button wiring
+      const addBtn = document.getElementById('add-recipe');
+      const modal = document.getElementById('add-modal');
+      const form = document.getElementById('add-form');
+      const cancel = document.getElementById('add-cancel');
+      if(isPrivate){ addBtn.hidden = false; }
+
+      function openModal(){ modal.style.display = 'grid'; modal.setAttribute('aria-hidden','false'); document.getElementById('add-title-input').focus(); }
+      function closeModal(){ modal.style.display = 'none'; modal.setAttribute('aria-hidden','true'); form.reset(); }
+      addBtn.addEventListener('click', openModal);
+      cancel.addEventListener('click', closeModal);
+      modal.addEventListener('click', (e)=>{ if(e.target === modal) closeModal(); });
+
+      form.addEventListener('submit', (e)=>{
+        e.preventDefault();
+        const title = (document.getElementById('add-title-input').value||'').trim();
+        const cats = (document.getElementById('add-cats').value||'').split(',').map(s=>s.trim()).filter(Boolean);
+        const ings = (document.getElementById('add-ings').value||'').split('\n').map(s=>s.trim()).filter(Boolean);
+        const steps = (document.getElementById('add-steps').value||'').trim();
+        if(!title || !steps || ings.length===0){ alert('Please fill title, at least one ingredient, and instructions.'); return; }
+        const rec = { title, categories: (cats.length?cats:['Uncategorized']), ingredients: ings, instructions: steps };
+        // Save to local storage list
+        const current = loadUserRecipes();
+        current.push(rec); saveUserRecipes(current);
+        recomputeRecipes();
+        selectedRecipeId = (title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''));
+        update();
+        
+        closeModal();
+      });
+
+      handleHash();
+      runTests();
+    })();
   </script>
 
   <!-- Optional schema to help SEO: simple ItemList of recipe anchors -->
