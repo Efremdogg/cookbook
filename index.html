@@ -256,6 +256,21 @@
     // --- Helpers ---
     let selectedCategory = 'All';
 
+    // (Restored) original helpers
+    const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+    const escapeHtml = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
+
+    function highlight(text, term){
+      if(!term) return escapeHtml(text);
+      const safe = term.replace(/[.*+?^${}()|[\]\]/g,'\$&');
+      return escapeHtml(text).replace(new RegExp(`(${safe})`,`ig`), '<mark>$1</mark>');
+    }
+
+    function debounced(fn, wait=120){
+      let t;return (...args)=>{clearTimeout(t);t=setTimeout(()=>fn(...args),wait)}
+    }
+
+    // (New) category helpers
     function collectCategories(list){
       const set = new Set(['All']);
       list.forEach(r=>{
@@ -280,18 +295,6 @@
         });
         nav.appendChild(b);
       });
-    }
-    const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
-    const escapeHtml = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
-
-    function highlight(text, term){
-      if(!term) return escapeHtml(text);
-      const safe = term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-      return escapeHtml(text).replace(new RegExp(`(${safe})`,`ig`), '<mark>$1</mark>');
-    }
-
-    function debounced(fn, wait=120){
-      let t;return (...args)=>{clearTimeout(t);t=setTimeout(()=>fn(...args),wait)}
     }
 
     // --- Render index ---
