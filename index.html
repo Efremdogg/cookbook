@@ -1602,99 +1602,7 @@
 
     ];
 
-    // Merge-in user recipes saved locally (private additions)
-    let recipes = [];
-    function loadUserRecipes(){
-      try{ const raw = localStorage.getItem('userRecipes'); return raw ? JSON.parse(raw) : []; }catch(_){ return []; }
-    }
-    function saveUserRecipes(arr){ try{ localStorage.setItem('userRecipes', JSON.stringify(arr)); }catch(_){} }
-    function recomputeRecipes(){ recipes = [...baseRecipes, ...loadUserRecipes()]; }
-
-    // --- State & helpers ---
-    let selectedCategory = localStorage.getItem('cat') || 'All';
-    let selectedRecipeId = null; // when set, show only that recipe
-
-    const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
-    const escapeHtml = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
-
-    function highlight(text, term){
-      if(!term) return escapeHtml(text);
-      const safe = term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-      return escapeHtml(text).replace(new RegExp(`(${safe})`,`ig`), '<mark>$1</mark>');
-    }
-
-    function debounced(fn, wait=120){
-      let t;return (...args)=>{clearTimeout(t);t=setTimeout(()=>fn(...args),wait)}
-    }
-
-    function collectCategories(list){
-      const set = new Set(['All']);
-      list.forEach(r=>{ (r.categories||['Uncategorized']).forEach(c=> set.add(c)); });
-      return Array.from(set);
-    }
-
-    function renderCategories(list){
-      const nav = document.getElementById('categories');
-      nav.innerHTML = '';
-      const cats = collectCategories(list);
-      cats.forEach((c,idx)=>{
-        const b = document.createElement('button');
-        b.className = 'pill';
-        b.type = 'button';
-        b.textContent = c;
-        b.setAttribute('aria-pressed', String(c===selectedCategory));
-        b.setAttribute('data-index', idx);
-        b.addEventListener('click', ()=>{ selectedCategory = c; localStorage.setItem('cat', c); selectedRecipeId=null; update(); });
-        nav.appendChild(b);
-      });
-    }
-
-    function renderIndex(list){
-      const ul = document.getElementById('recipe-index');
-      ul.innerHTML = '';
-      list.forEach(r=>{
-        const id = slug(r.title);
-        const li = document.createElement('li');
-        li.innerHTML = `<a href="#${id}" data-id="${id}">${escapeHtml(r.title)}</a>`;
-        ul.appendChild(li);
-      });
-      document.getElementById('count').textContent = `${list.length} recipe${list.length===1?'':'s'}`;
-      ul.querySelectorAll('a').forEach(a=>{
-        a.addEventListener('click', (e)=>{
-          selectedRecipeId = a.getAttribute('data-id');
-          update();
-        });
-      });
-    }
-
     
-    function renderRecipes(list, term=''){
-      const wrap = document.getElementById('recipe-list');
-      wrap.innerHTML = '';
-      let items = list;
-      if(selectedRecipeId){ items = list.filter(r=> slug(r.title)===selectedRecipeId); }
-      items.forEach(r=>{
-        const id = slug(r.title);
-        const art = document.createElement('article');
-        art.className = 'recipe';
-        art.id = id;
-        art.tabIndex = -1;
-        const ing = r.ingredients.map(i=>`<li>${highlight(i, term)}</li>`).join('');
-        const cats = (r.categories||['Uncategorized']).join(', ');
-        art.innerHTML = `
-          <h3><button class="btn" data-open="${id}" style="border:none;background:transparent;padding:0;font:inherit;color:inherit;text-align:left">${highlight(r.title, term)}</button></h3>
-          <div class="meta">${r.ingredients.length} ingredients • ${cats}</div>
-          <div class="actions">
-            <button class="btn" data-copy="${id}-ingredients" aria-label="Copy ingredients for ${escapeHtml(r.title)}">Copy ingredients</button>
-            <button class="btn" data-copy="${id}-instructions" aria-label="Copy instructions for ${escapeHtml(r.title)}">Copy steps</button>
-                      </div>
-          <h4>Ingredients</h4>
-          <ul id="${id}-ingredients">${ing}</ul>
-          <h4>Instructions</h4>
-          <div id="${id}-instructions"><p>${highlight(r.instructions.trim(), term).replace(/\n\n/g,'</p><p>')}</p></div>
-        `;
-        wrap.appendChild(art);
-      });
       // Title click also enables single view
       wrap.querySelectorAll('[data-open]').forEach(b=>{
         b.addEventListener('click', ()=>{
@@ -1703,15 +1611,7 @@
           const target = document.getElementById(selectedRecipeId);
           if(target) target.focus({preventScroll:true});
         });
-      });
-      // Copy buttons
-      wrap.querySelectorAll('[data-copy]').forEach(b=>{
-        b.addEventListener('click', async ()=>{
-          const sel = document.getElementById(b.getAttribute('data-copy'));
-          const txt = sel ? sel.innerText.replace(/\n+/g,'\n').trim() : '';
-          try{ await navigator.clipboard.writeText(txt); b.textContent = 'Copied!'; setTimeout(()=>{ const isIng = b.getAttribute('data-copy').includes('ingredients'); b.textContent = 'Copy ' + (isIng?'ingredients':'steps'); },1200);}catch(e){ alert('Could not copy.'); }
-        });
-      });
+     
 
       // Single bar state
       const bar = document.getElementById('single-bar');
@@ -1812,21 +1712,7 @@
       if(url.searchParams.has('admin')){ localStorage.setItem('cookbook_admin','1'); url.searchParams.delete('admin'); history.replaceState(null,'', url.pathname + (url.searchParams.toString()?('?'+url.searchParams.toString()):'')); }
       const isPrivate = ['localhost','127.0.0.1','::1',''].includes(location.hostname) || location.hostname.endsWith('.local') || localStorage.getItem('cookbook_admin')==='1';
 
-      // Build recipes with user additions
-      recomputeRecipes();
-
-      renderCategories(recipes);
-      renderIndex(recipes);
-      renderRecipes(recipes);
-
-      const search = document.getElementById('search-bar');
-      const savedQ = localStorage.getItem('q');
-      if(savedQ){ search.value = savedQ; }
-      search.addEventListener('input', onSearch);
-
-      document.getElementById('show-all').addEventListener('click', ()=>{ selectedRecipeId=null; update(); });
-      window.addEventListener('hashchange', handleHash);
-
+      
       // Shortcuts
       window.addEventListener('keydown', (e)=>{
         if(e.key === '/' && document.activeElement !== search){ e.preventDefault(); search.focus(); return; }
