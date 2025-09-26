@@ -308,7 +308,7 @@
         width: 280px;
         height: 280px;
         border: 2px solid #000;
-        margin: 0 0 8px 16px;
+        margin: 16px 0 8px 16px; /* top equals left for equal distance */
         border-radius: 8px;
         overflow: hidden;
         display: none;
@@ -463,7 +463,7 @@
          In a blender, combine the garlic clove, anchovies, parsley, mustard, Worcestershire sauce, lemon zest, lemon juice, and the remaining fresh butter. Add the sautéed scallions and blend everything together until smooth.
          Blend until the mixture reaches a creamy, homogenous consistency. Add a pinch of salt to taste. Refrigerate before serving.
        `,
-        image: "https://stephanedecotterd.com/wp-content/uploads/2012/11/dsc_0978.jpg" 
+         image: "https://stephanedecotterd.com/wp-content/uploads/2012/11/dsc_0978.jpg" 
         },
         {
           title: 'Filetto al Pepe Verde',
@@ -523,18 +523,12 @@
       let selectedCategory = localStorage.getItem('cat') || 'All';
       let selectedRecipeId = null; // when set, show only that recipe
 
-      // In-memory user additions (session-only to respect "no local merge")
-      let userRecipesMemory = [];
-      let recipes = [...baseRecipes];
-      function loadUserRecipes() {
-        return userRecipesMemory;
-      }
-      function saveUserRecipes(arr) {
-        userRecipesMemory = Array.isArray(arr) ? arr : [];
-      }
-      function recomputeRecipes() {
-        recipes = [...baseRecipes, ...loadUserRecipes()];
-      }
+      // minimal session recipe helpers (no storage)
+let __session = [];
+let recipes = [...baseRecipes];
+function loadUserRecipes(){ return __session; }
+function saveUserRecipes(arr){ __session = Array.isArray(arr)?arr:[]; }
+function recomputeRecipes(){ recipes = [...baseRecipes, ...__session]; }
 
       const slug = (s) =>
         s
@@ -811,37 +805,9 @@
       (function init() {
         document.getElementById('year').textContent = new Date().getFullYear();
 
-        // Private mode detection: localhost/.local OR ?admin OR stored flag
-        const url = new URL(location.href);
-        if (url.searchParams.has('admin')) {
-          localStorage.setItem('cookbook_admin', '1');
-          url.searchParams.delete('admin');
-          history.replaceState(null, '', url.pathname + (url.searchParams.toString() ? '?' + url.searchParams.toString() : ''));
-        }
-        const isPrivate =
-          ['localhost', '127.0.0.1', '::1', ''].includes(location.hostname) ||
-          location.hostname.endsWith('.local') ||
-          localStorage.getItem('cookbook_admin') === '1';
+        
 
-        // Build recipes (base + in-memory user)
-        recomputeRecipes();
-
-        renderCategories(recipes);
-        renderIndex(recipes);
-        renderRecipes(recipes);
-
-        const search = document.getElementById('search-bar');
-        const savedQ = localStorage.getItem('q');
-        if (savedQ) {
-          search.value = savedQ;
-        }
-        search.addEventListener('input', onSearch);
-
-        document.getElementById('show-all').addEventListener('click', () => {
-          selectedRecipeId = null;
-          update();
-        });
-        window.addEventListener('hashchange', handleHash);
+        
 
         // Shortcuts
         window.addEventListener('keydown', (e) => {
